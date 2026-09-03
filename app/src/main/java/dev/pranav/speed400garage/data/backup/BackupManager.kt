@@ -130,18 +130,11 @@ class BackupManager @Inject constructor(
         if (!file.exists() || file.length() < 16) return false
         val header = ByteArray(16)
         FileInputStream(file).use { it.read(header) }
-        return String(header, Charsets.US_ASCII).startsWith("SQLite format 3")
+        return BackupFormat.looksLikeSqlite(header)
     }
 
-    private fun manifest(): String = """
-        {
-          "app": "dev.pranav.speed400garage",
-          "schemaVersion": 1,
-          "exportedAt": ${System.currentTimeMillis()},
-          "contains": ["$DB_ENTRY", "csv/*.csv"],
-          "note": "The CSVs are a plain-text rendering of every table so this data is never trapped in one app's schema."
-        }
-    """.trimIndent()
+    private fun manifest(): String =
+        BackupFormat.manifest(System.currentTimeMillis(), SCHEMA_VERSION)
 
     private fun tablesAsCsv(): Map<String, String> {
         val database = db.openHelper.readableDatabase
@@ -152,25 +145,32 @@ class BackupManager @Inject constructor(
         return tables.associateWith { table ->
             buildString {
                 database.query(SimpleSQLiteQuery("SELECT * FROM `$table`")).use { c ->
-                    appendLine((0 until c.columnCount).joinToString(",") { escape(c.getColumnName(it)) })
+                    appendLine(BackupFormat.csvRow((0 until c.columnCount).map { c.getColumnName(it) }))
                     while (c.moveToNext()) {
-                        appendLine((0 until c.columnCount).joinToString(",") { i ->
-                            if (c.isNull(i)) "" else escape(c.getString(i) ?: "")
-                        })
+                        appendLine(
+                            BackupFormat.csvRow(
+                                (0 until c.columnCount).map { i -> if (c.isNull(i)) null else c.getString(i) }
+                            )
+                        )
                     }
                 }
             }
         }
     }
 
-    private fun escape(value: String): String =
-        if (value.any { it == ',' || it == '"' || it == '\n' }) "\"${value.replace("\"", "\"\"")}\"" else value
-
     companion object {
-        const val DB_ENTRY = "database/${GarageDatabase.NAME}"
-        const val MANIFEST = "manifest.json"
+        const val DB_ENTRY = BackupFormat.DB_ENTRY
+        const val MANIFEST = BackupFormat.MANIFEST
+
+        /**
+         * Recorded in the manifest so a restore can tell which schema the archive was
+         * written against. A backup that does not say what it is cannot be reasoned
+         * about years later, which is the only time it matters.
+         */
+        const val SCHEMA_VERSION = 3
+
         fun suggestedFilename(): String =
-            "speed400-garage-backup-${java.time.LocalDate.now()}.zip"
+            BackupFormat.suggestedFilename(java.time.LocalDate.now().toString())
     }
 }
 
