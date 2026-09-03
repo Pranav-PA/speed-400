@@ -1,0 +1,114 @@
+name: Release
+
+# Tag a commit to ship it:
+#   git tag v0.2.0 && git push origin v0.2.0
+#
+# The tag drives both versionName and versionCode, so a release APK's version is a
+# deterministic function of its tag and always increases.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, e.g. 0.2.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out the version
+        id: version
+        run: |
+          set -euo pipefail
+          RAW="${{ github.event.inputs.version || github.ref_name }}"
+          NAME="${RAW#v}"
+          if ! [[ "$NAME" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::Version '$NAME' is not MAJOR.MINOR.PATCH — tag as e.g. v0.2.0"
+            exit 1
+          fi
+          # Monotonic as long as minor and patch stay under 100, which they will.
+          CODE=$(( ${BASH_REMATCH[1]} * 10000 + ${BASH_REMATCH[2]} * 100 + ${BASH_REMATCH[3]} ))
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "Building $NAME (versionCode $CODE)"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Restore the signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEYSTORE_BASE64:-}" ]; then
+            echo "::error::KEYSTORE_BASE64 secret is not set. Run scripts/setup-signing.sh once and add the secrets it prints — see docs/releasing.md."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: Run the tests
+        run: ./gradlew :app:testDebugUnitTest --console=plain
+
+      - name: Build the signed APK
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew :app:assembleRelease --console=plain \
+            -PappVersionCode=${{ steps.version.outputs.code }} \
+            -PappVersionName=${{ steps.version.outputs.name }}
+
+      - name: Verify it really is signed
+        run: |
+          set -euo pipefail
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -f "$APK" || { echo "::error::No signed APK produced — check the keystore secrets."; exit 1; }
+          "$ANDROID_HOME"/build-tools/35.0.0/apksigner verify --print-certs "$APK"
+
+      - name: Assemble the release assets
+        id: assets
+        run: |
+          set -euo pipefail
+          NAME="${{ steps.version.outputs.name }}"
+          CODE="${{ steps.version.outputs.code }}"
+          APK_NAME="speed400garage-$NAME.apk"
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk "dist/$APK_NAME"
+          SHA=$(sha256sum "dist/$APK_NAME" | cut -d' ' -f1)
+
+          # The in-app updater reads exactly this file. It carries the checksum the app
+          # verifies before handing the APK to Android's package installer.
+          NOTES=$(git tag -l --format='%(contents)' "${{ github.ref_name }}" 2>/dev/null || true)
+          jq -n \
+            --argjson versionCode "$CODE" \
+            --arg versionName "$NAME" \
+            --arg apk "$APK_NAME" \
+            --arg sha256 "$SHA" \
+            --arg notes "$NOTES" \
+            --arg released_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{versionCode:$versionCode, versionName:$versionName, apk:$apk, sha256:$sha256, notes:$notes, released_at:$released_at}' \
+            > dist/update.json
+          cat dist/update.json
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ steps.version.outputs.name }}
+          generate_release_notes: true
+          files: |
+            dist/*.apk
+            dist/update.json

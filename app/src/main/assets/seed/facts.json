@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "generated_on": "2026-09-03",
+  "bike": "Triumph Speed 400 (2024)",
+  "source_document": {
+    "title": "Owner's Handbook — Speed 400, Scrambler 400 X, Scrambler 400 XC, Thruxton 400 and Tracker 400",
+    "part_number": "3850838-IN",
+    "market": "India",
+    "pdf_created": "2026-01-06",
+    "pages": 229,
+    "retrieved_from": "https://api.triumphtechnicalinformation.com/handbooks/documents/698361316236d0957f547eca/pdf"
+  },
+  "verification": {
+    "state": "machine_extracted",
+    "method": "Read directly from the PDF text layer, page by page. Every value below carries the printed page it came from. NOT yet eyeballed against the rendered page by the owner.",
+    "promote_with": "Appendix B, Prompt 5 — 'Verify the seeded facts'. Until then verified_on is null and the app must render these as 'manual, unconfirmed'.",
+    "model_column_warning": "This handbook covers five models. Every row below was taken from the Speed 400 column ONLY (pp.198-202). The Scrambler/Thruxton/Tracker columns differ — notably drive chain slack and brake pad thicknesses."
+  },
+  "facts": [
+    {"key":"engine.displacement","label":"Engine displacement","value":"398","unit":"cc","category":"engine","source":"manual","page_ref":198,"is_safety_critical":false,"verified_on":null},
+    {"key":"engine.configuration","label":"Engine configuration","value":"Single cylinder four valve DOHC","unit":null,"category":"engine","source":"manual","page_ref":198,"is_safety_critical":false,"verified_on":null},
+    {"key":"engine.bore","label":"Bore","value":"89","unit":"mm","category":"engine","source":"manual","page_ref":198,"is_safety_critical":false,"verified_on":null},
+    {"key":"engine.stroke","label":"Stroke","value":"64","unit":"mm","category":"engine","source":"manual","page_ref":198,"is_safety_critical":false,"verified_on":null},
+    {"key":"engine.compression_ratio","label":"Compression ratio","value":"12.0:1","unit":null,"category":"engine","source":"manual","page_ref":198,"is_safety_critical":false,"verified_on":null},
+    {"key":"engine.rev_limiter","label":"Electronic rev limiter","value":"9500","unit":"rpm","category":"engine","source":"manual","page_ref":199,"is_safety_critical":false,"verified_on":null},
+
+    {"key":"payload.max","label":"Maximum payload (rider, passenger, luggage and accessories)","value":"174","unit":"kg","category":"load","source":"manual","page_ref":198,"is_safety_critical":true,"verified_on":null},
+
+    {"key":"oil.capacity_dry","label":"Engine oil capacity (dry fill)","value":"2.25","unit":"litres","category":"fluids","source":"manual","page_ref":198,"is_safety_critical":true,"verified_on":null},
+    {"key":"oil.capacity_wet_with_filter","label":"Engine oil capacity (wet fill, including oil filter)","value":"2","unit":"litres","category":"fluids","source":"manual","page_ref":198,"is_safety_critical":true,"verified_on":null},
+    {"key":"oil.capacity_wet_without_filter","label":"Engine oil capacity (wet fill, excluding oil filter)","value":"1.8","unit":"litres","category":"fluids","source":"manual","page_ref":198,"is_safety_critical":true,"verified_on":null},
+    {"key":"oil.grade","label":"Engine oil grade","value":"Fully synthetic 10W/50 motorcycle engine oil meeting API SN (or higher) and JASO MA2. Semi-synthetic must NOT be used.","unit":null,"category":"fluids","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null,"also_on_page":126},
+
+    {"key":"coolant.type","label":"Coolant type","value":"Orange — Triumph D2053 OAT coolant (premixed); or Green — HP THANDA RAJA B OAT coolant","unit":null,"category":"fluids","source":"manual","page_ref":199,"is_safety_critical":true,"verified_on":null,"notes":"Do not mix coolants of different types and colours (p.126)."},
+    {"key":"coolant.ratio","label":"Coolant ratio","value":"50/50","unit":null,"category":"fluids","source":"manual","page_ref":199,"is_safety_critical":true,"verified_on":null},
+    {"key":"coolant.capacity","label":"Cooling system capacity","value":"1.2","unit":"litres","category":"fluids","source":"manual","page_ref":199,"is_safety_critical":true,"verified_on":null},
+    {"key":"coolant.thermostat_opening","label":"Thermostat opening temperature","value":"88","unit":"°C","category":"fluids","source":"manual","page_ref":199,"is_safety_critical":false,"verified_on":null},
+    {"key":"coolant.freeze_protection","label":"Coolant freeze protection","value":"-34","unit":"°C","category":"fluids","source":"manual","page_ref":126,"is_safety_critical":false,"verified_on":null},
+    {"key":"coolant.system_pressure","label":"Cooling system pressure (cap label)","value":"1.4","unit":"bar","category":"fluids","source":"manual","page_ref":126,"is_safety_critical":false,"verified_on":null},
+
+    {"key":"brake.fluid_spec","label":"Brake fluid specification","value":"Triumph Performance DOT 4 brake fluid","unit":null,"category":"fluids","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"grease.spec","label":"Bearings and pivots grease","value":"Triumph Performance RG2 grease (NLGI 2)","unit":null,"category":"fluids","source":"manual","page_ref":202,"is_safety_critical":false,"verified_on":null},
+    {"key":"chain.lube_spec","label":"Drive chain lubricant","value":"Triumph Performance chain lubricant","unit":null,"category":"fluids","source":"manual","page_ref":202,"is_safety_critical":false,"verified_on":null},
+
+    {"key":"fuel.type","label":"Fuel type","value":"Unleaded, 91 RON (U.S. 87 CLC/AKI)","unit":null,"category":"fuel","source":"manual","page_ref":199,"is_safety_critical":true,"verified_on":null},
+    {"key":"fuel.tank_capacity","label":"Fuel tank capacity","value":"13","unit":"litres","category":"fuel","source":"manual","page_ref":199,"is_safety_critical":true,"verified_on":null},
+    {"key":"fuel.low_fuel_light","label":"Low fuel indicator light","value":"3","unit":"litres remaining","category":"fuel","source":"manual","page_ref":199,"is_safety_critical":false,"verified_on":null},
+    {"key":"fuel.pressure_nominal","label":"Fuel pressure (nominal)","value":"3.5","unit":"bar","category":"fuel","source":"manual","page_ref":199,"is_safety_critical":false,"verified_on":null},
+
+    {"key":"spark_plug.type","label":"Spark plug type","value":"Bosch VR6NEU","unit":null,"category":"ignition","source":"manual","page_ref":199,"is_safety_critical":true,"verified_on":null},
+    {"key":"spark_plug.gap","label":"Spark plug gap","value":"0.9 (+0.00 / -0.1)","unit":"mm","category":"ignition","source":"manual","page_ref":199,"is_safety_critical":true,"verified_on":null},
+
+    {"key":"tyre.front_size","label":"Front tyre size","value":"110/70 ZR17 54W","unit":null,"category":"tyres","source":"manual","page_ref":201,"is_safety_critical":true,"verified_on":null},
+    {"key":"tyre.rear_size","label":"Rear tyre size","value":"150/60 ZR17 66W","unit":null,"category":"tyres","source":"manual","page_ref":201,"is_safety_critical":true,"verified_on":null},
+    {"key":"tyre.front_pressure","label":"Front tyre pressure (cold)","value":"1.79 bar / 179 kPa / 26.0 psi","unit":null,"category":"tyres","source":"manual","page_ref":201,"is_safety_critical":true,"verified_on":null,"notes":"The handbook gives ONE figure. There is no separate solo/pillion pressure for this model."},
+    {"key":"tyre.rear_pressure","label":"Rear tyre pressure (cold)","value":"2.28 bar / 228 kPa / 33.0 psi","unit":null,"category":"tyres","source":"manual","page_ref":201,"is_safety_critical":true,"verified_on":null,"notes":"The handbook gives ONE figure. There is no separate solo/pillion pressure for this model."},
+    {"key":"tyre.min_tread_under_130","label":"Minimum tread depth (used under 130 km/h)","value":"2","unit":"mm","category":"tyres","source":"manual","page_ref":159,"is_safety_critical":true,"verified_on":null},
+    {"key":"tyre.min_tread_over_130_front","label":"Minimum tread depth, front (used over 130 km/h)","value":"2","unit":"mm","category":"tyres","source":"manual","page_ref":159,"is_safety_critical":true,"verified_on":null},
+    {"key":"tyre.min_tread_over_130_rear","label":"Minimum tread depth, rear (used over 130 km/h)","value":"3","unit":"mm","category":"tyres","source":"manual","page_ref":159,"is_safety_critical":true,"verified_on":null},
+    {"key":"tyre.bedding_in","label":"New tyre bedding-in distance","value":"160","unit":"km","category":"tyres","source":"manual","page_ref":159,"is_safety_critical":false,"verified_on":null,"notes":"Approximately 100 miles (160 km) to become accustomed to new handling characteristics."},
+
+    {"key":"brake.front_carrier_plate_thickness","label":"Front brake carrier plate thickness","value":"3.5","unit":"mm","category":"brakes","source":"manual","page_ref":141,"is_safety_critical":true,"verified_on":null,"notes":"Speed 400 / Thruxton 400 / Tracker 400 column. Scrambler models are 3.74 mm."},
+    {"key":"brake.front_pad_min_lining","label":"Front brake pad lining minimum thickness","value":"0.5","unit":"mm","category":"brakes","source":"manual","page_ref":141,"is_safety_critical":true,"verified_on":null},
+    {"key":"brake.front_min_service_thickness","label":"Front minimum service thickness (lining + carrier plate)","value":"4","unit":"mm","category":"brakes","source":"manual","page_ref":141,"is_safety_critical":true,"verified_on":null,"notes":"Speed 400 column. Scrambler models are 4.24 mm."},
+    {"key":"brake.rear_carrier_plate_thickness","label":"Rear brake carrier plate thickness","value":"3.0","unit":"mm","category":"brakes","source":"manual","page_ref":142,"is_safety_critical":true,"verified_on":null,"notes":"Handbook states this under 'All Models'."},
+    {"key":"brake.rear_pad_min_lining","label":"Rear brake pad lining minimum thickness","value":"0.8","unit":"mm","category":"brakes","source":"manual","page_ref":142,"is_safety_critical":true,"verified_on":null},
+    {"key":"brake.rear_min_service_thickness","label":"Rear minimum service thickness (lining + carrier plate)","value":"3.8","unit":"mm","category":"brakes","source":"manual","page_ref":142,"is_safety_critical":true,"verified_on":null},
+
+    {"key":"chain.spec","label":"Drive chain specification","value":"520 Series X-ring chain","unit":null,"category":"transmission","source":"manual","page_ref":200,"is_safety_critical":true,"verified_on":null},
+    {"key":"chain.links","label":"Drive chain number of links","value":"104","unit":"links","category":"transmission","source":"manual","page_ref":200,"is_safety_critical":true,"verified_on":null},
+    {"key":"chain.length_20_links","label":"Chain length over 20 links","value":"323.7","unit":"mm","category":"transmission","source":"manual","page_ref":200,"is_safety_critical":false,"verified_on":null},
+    {"key":"chain.free_movement","label":"Drive chain vertical free movement","value":"20-25","unit":"mm","category":"transmission","source":"manual","page_ref":134,"is_safety_critical":true,"verified_on":null,"notes":"Speed 400 / Thruxton 400 / Tracker 400. Scrambler 400 X and XC are 40-45 mm — do not confuse them."},
+    {"key":"chain.lube_interval","label":"Drive chain lubrication interval","value":"300","unit":"km","category":"transmission","source":"manual","page_ref":133,"is_safety_critical":false,"verified_on":null,"notes":"Every 200 miles (300 km), and after wet riding or whenever the chain appears dry."},
+    {"key":"clutch.lever_free_play","label":"Clutch lever free play","value":"3.0-5.0","unit":"mm","category":"transmission","source":"manual","page_ref":132,"is_safety_critical":false,"verified_on":null},
+    {"key":"transmission.type","label":"Transmission type","value":"6 speed, constant mesh","unit":null,"category":"transmission","source":"manual","page_ref":200,"is_safety_critical":false,"verified_on":null},
+    {"key":"transmission.primary_drive_ratio","label":"Primary drive ratio","value":"2.839:1 (88/31)","unit":null,"category":"transmission","source":"manual","page_ref":200,"is_safety_critical":false,"verified_on":null},
+    {"key":"transmission.final_drive_ratio","label":"Final drive ratio","value":"3.36:1 (43/15)","unit":null,"category":"transmission","source":"manual","page_ref":200,"is_safety_critical":false,"verified_on":null},
+
+    {"key":"electrical.battery_type","label":"Battery type","value":"ETZ-9 or YTX9-BS","unit":null,"category":"electrical","source":"manual","page_ref":201,"is_safety_critical":true,"verified_on":null},
+    {"key":"electrical.battery_rating","label":"Battery rating","value":"12 Volt, 8 Ah","unit":null,"category":"electrical","source":"manual","page_ref":201,"is_safety_critical":true,"verified_on":null},
+    {"key":"electrical.alternator_rating","label":"Alternator rating","value":"14 Volt, 18.5 Amp at 4,000 rpm","unit":null,"category":"electrical","source":"manual","page_ref":201,"is_safety_critical":true,"verified_on":null},
+    {"key":"electrical.headlight","label":"Headlight","value":"LED","unit":null,"category":"electrical","source":"manual","page_ref":201,"is_safety_critical":false,"verified_on":null},
+
+    {"key":"torque.engine_oil_drain_plug","label":"Torque — engine oil drain plug","value":"13","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.oil_filter_cover_fixings","label":"Torque — oil filter cover fixings","value":"11","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.evacuation_strainer_plug","label":"Torque — evacuation strainer plug","value":"10","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.front_left_engine_cover_fixings","label":"Torque — front left engine cover fixings","value":"11","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.front_left_cover_finisher_fixings","label":"Torque — front left cover finisher fixings","value":"7","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.clutch_cable_lower_lock_nut","label":"Torque — clutch cable lower lock nut","value":"15","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.rear_wheel_spindle_nut","label":"Torque — rear wheel spindle nut","value":"98","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.drive_chain_adjuster_lock_nut","label":"Torque — drive chain adjuster lock nut","value":"11","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.drive_chain_guard_fixings","label":"Torque — drive chain guard fixings","value":"9","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.battery_terminal_fixings","label":"Torque — battery terminal fixings","value":"4.5","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+    {"key":"torque.spark_plug","label":"Torque — spark plug","value":"17","unit":"Nm","category":"torque","source":"manual","page_ref":202,"is_safety_critical":true,"verified_on":null},
+
+    {"key":"service.first_service","label":"First service interval","value":"1,000 km (600 miles) or 6 months, whichever comes first","unit":null,"category":"service","source":"manual","page_ref":116,"is_safety_critical":false,"verified_on":null},
+    {"key":"service.mileage_interval","label":"Mileage service interval","value":"16,000 km (10,000 miles)","unit":null,"category":"service","source":"manual","page_ref":116,"is_safety_critical":false,"verified_on":null},
+    {"key":"service.annual_interval","label":"Annual service interval","value":"Every year","unit":null,"category":"service","source":"manual","page_ref":116,"is_safety_critical":false,"verified_on":null},
+    {"key":"service.indicator_warning","label":"Service indicator behaviour","value":"Illuminates for five seconds after start-up when a service is due in approximately 100 km (62 miles); illuminates permanently once the mileage is reached, until reset.","unit":null,"category":"service","source":"manual","page_ref":115,"is_safety_critical":false,"verified_on":null},
+    {"key":"warranty.period","label":"Warranty period","value":"NOT STATED IN THE HANDBOOK — it says 'unlimited mileage warranty, commencing from the date of first registration or the date of sale if unregistered. Refer to your motorcycle warranty registration certificate for details of the warranty period.'","unit":null,"category":"warranty","source":"manual","page_ref":192,"is_safety_critical":false,"verified_on":null,"notes":"The duration must come from Pranav's own warranty registration certificate, not from this app's seed data."}
+  ]
+}

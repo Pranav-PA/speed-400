@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "generated_on": "2026-09-03",
+  "bike": "Triumph Speed 400 (2024)",
+  "source_document": {
+    "title": "Owner's Handbook — Speed 400, Scrambler 400 X, Scrambler 400 XC, Thruxton 400 and Tracker 400",
+    "part_number": "3850838-IN",
+    "market": "India",
+    "pdf_created": "2026-01-06",
+    "pages": 229,
+    "sha_note": "md5 93c29b101d5e246695d48a3c49fb18b2, 10811884 bytes",
+    "retrieved_from": "https://api.triumphtechnicalinformation.com/handbooks/documents/698361316236d0957f547eca/pdf",
+    "page_refs_are": "printed page numbers, which in this PDF are identical to the PDF page index"
+  },
+  "schedule_shape": {
+    "note": "Handbook pp.114-119. Services are 'odometer reading OR time period, whichever comes first'. Columns of the Scheduled Maintenance Table are: Daily; First Service 600 mile (1,000 km) or 6 Month; Annual Service (Year); then mileage services at 10,000 mi (16,000 km), 20,000 mi (32,000 km), 30,000 mi (48,000 km) and 40,000 mi (64,000 km).",
+    "manual_page_ref": 116,
+    "annual_rule": "Under 16,000 km/year: maintain annually, plus mileage items as reached. Over 16,000 km/year: maintain by mileage, plus annual items at their annual interval. Handbook p.114."
+  },
+  "components": [
+    {"key":"first_service","display_name":"First service","action_kind":"service","interval_km":1000,"interval_days":183,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"one_off":true,"notes":"Handbook states 600 mile (1,000 km) or 6 Month, whichever comes first. interval_days is 6 months expressed as 183 days."},
+    {"key":"scheduled_service","display_name":"Scheduled service (annual / mileage)","action_kind":"service","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"notes":"The whole workshop visit. Individual items below reset independently."},
+
+    {"key":"engine_oil","display_name":"Engine oil","action_kind":"replace","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Renewed at first service, annual service and every mileage service."},
+    {"key":"oil_filter","display_name":"Engine oil filter","action_kind":"replace","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Renewed alongside engine oil."},
+    {"key":"oil_strainers","display_name":"Engine oil strainers (x2)","action_kind":"service","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Clean."},
+    {"key":"engine_oil_level","display_name":"Engine oil level","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":false,"is_daily_check":true,"notes":"Daily check and adjust."},
+    {"key":"engine_leaks","display_name":"Engine — check for leaks","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":false,"is_daily_check":true},
+
+    {"key":"air_filter","display_name":"Air filter","action_kind":"replace","interval_km":16000,"interval_days":null,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Mileage services only — NOT an annual item. Handbook adds: replace more often if consistently riding in wet or dusty conditions."},
+    {"key":"fuel_filter","display_name":"Fuel filter","action_kind":"replace","interval_km":16000,"interval_days":null,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Mileage services only."},
+    {"key":"spark_plug","display_name":"Spark plug","action_kind":"replace","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Renewed at 32,000 km and 64,000 km. Separately CHECKED at 16,000 km and 48,000 km (see spark_plug_check)."},
+    {"key":"spark_plug_check","display_name":"Spark plug — check","action_kind":"check","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":false,"is_daily_check":false,"first_due_km":16000,"notes":"Checked at 16,000 km and 48,000 km — i.e. every 32,000 km offset by 16,000."},
+    {"key":"throttle_body_plate","display_name":"Throttle body plate (butterfly)","action_kind":"service","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Check/clean."},
+    {"key":"exhaust_silencer_drains","display_name":"Exhaust silencer drain holes","action_kind":"service","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Clean."},
+    {"key":"airbox_drain_tube","display_name":"Airbox drain tube (x2)","action_kind":"service","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Drain/clean. Annual service onwards."},
+    {"key":"fuel_system_leaks","display_name":"Fuel system — check for leaks","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":116,"is_warranty_relevant":false,"is_daily_check":true},
+
+    {"key":"coolant","display_name":"Coolant","action_kind":"replace","interval_km":null,"interval_days":1461,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Handbook: renew every 4 years, regardless of mileage. 1461 days = 4 years including one leap day."},
+    {"key":"coolant_hoses","display_name":"Coolant hoses and lower radiator grommets","action_kind":"replace","interval_km":null,"interval_days":1461,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Renew every 4 years, regardless of mileage."},
+    {"key":"coolant_pump_seals","display_name":"Coolant pump seals","action_kind":"replace","interval_km":48000,"interval_days":null,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":true,"is_daily_check":false,"one_off":true,"notes":"Handbook marks this at the 30,000 mile (48,000 km) service ONLY. Modelled as a one-off, not a recurring interval."},
+    {"key":"coolant_level","display_name":"Coolant level","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":false,"is_daily_check":true,"notes":"Also stated on p.126: check the coolant level each day before riding."},
+    {"key":"radiator_fan","display_name":"Radiator cooling fan","action_kind":"check","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":false,"is_daily_check":false},
+
+    {"key":"brake_fluid","display_name":"Brake fluid","action_kind":"replace","interval_km":null,"interval_days":731,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Handbook: renew every 2 years, regardless of mileage. 731 days = 2 years including one leap day."},
+    {"key":"brake_pads_front","display_name":"Front brake pads","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true,"notes":"Wear level is a daily check. Replacement is condition-based (minimum thickness, p.141), NOT interval-based — the handbook gives no km figure for pad life."},
+    {"key":"brake_pads_rear","display_name":"Rear brake pads","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true,"notes":"Condition-based replacement, see p.142."},
+    {"key":"brake_fluid_level","display_name":"Brake fluid levels","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true},
+    {"key":"brake_system","display_name":"Brake system — check operation","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true},
+
+    {"key":"chain_lube","display_name":"Drive chain — lubricate","action_kind":"service","interval_km":300,"interval_days":null,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Handbook p.119 and p.133: every 200 miles (300 km), and also after riding in wet weather, on wet roads, or any time the chain appears dry."},
+    {"key":"chain_slack","display_name":"Drive chain slack","action_kind":"adjust","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":true,"notes":"Daily check/adjust. Target 20-25 mm for Speed 400 (p.134)."},
+    {"key":"chain_wear","display_name":"Drive chain — wear check","action_kind":"check","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":false},
+    {"key":"chain_rubbing_strip","display_name":"Drive chain rubbing strip","action_kind":"check","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Check for wear, cracks or damage."},
+    {"key":"chain","display_name":"Drive chain (replacement)","action_kind":"replace","interval_km":null,"interval_days":null,"interval_source":"unverified","manual_page_ref":136,"is_warranty_relevant":false,"is_daily_check":false,"notes":"NO replacement interval in the handbook. Replacement is condition-based on the wear inspection (p.136). Do not invent a km figure."},
+    {"key":"sprockets","display_name":"Sprockets","action_kind":"replace","interval_km":null,"interval_days":null,"interval_source":"unverified","manual_page_ref":136,"is_warranty_relevant":false,"is_daily_check":false,"notes":"NO replacement interval in the handbook. Covered only by 'Drive Chain and Sprocket Wear Inspection', p.136."},
+
+    {"key":"clutch_cable","display_name":"Clutch cable","action_kind":"adjust","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Check function and adjust/renew as necessary. Free play target 3.0-5.0 mm (p.132)."},
+    {"key":"clutch_lever_pivot","display_name":"Clutch lever pivot","action_kind":"service","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Clean/grease."},
+    {"key":"clutch_operation","display_name":"Clutch — check operation","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":false,"is_daily_check":true},
+    {"key":"valve_clearance","display_name":"Valve clearances","action_kind":"check","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":117,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Check/adjust at 32,000 km and 64,000 km."},
+
+    {"key":"tyre_pressure_check","display_name":"Tyre pressures","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true,"notes":"Handbook p.158: check tyre pressures daily, when cold."},
+    {"key":"tyre_wear","display_name":"Tyre wear / tyre damage","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true},
+    {"key":"tyre_front","display_name":"Front tyre","action_kind":"replace","interval_km":null,"interval_days":null,"interval_source":"unverified","manual_page_ref":159,"is_warranty_relevant":false,"is_daily_check":false,"notes":"NO replacement interval in the handbook. Condition-based on minimum tread depth: 2 mm (p.159)."},
+    {"key":"tyre_rear","display_name":"Rear tyre","action_kind":"replace","interval_km":null,"interval_days":null,"interval_source":"unverified","manual_page_ref":159,"is_warranty_relevant":false,"is_daily_check":false,"notes":"NO replacement interval in the handbook. Condition-based: 2 mm, or 3 mm if used over 130 km/h (p.159)."},
+    {"key":"wheel_bearings","display_name":"Wheel bearings","action_kind":"check","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":false},
+    {"key":"wheels","display_name":"Wheels — inspect for damage","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true},
+
+    {"key":"headstock_bearings","display_name":"Headstock bearings","action_kind":"check","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":false},
+    {"key":"swinging_arm_spindle","display_name":"Swinging arm spindle","action_kind":"service","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Lubricate."},
+    {"key":"fork_oil","display_name":"Fork oil","action_kind":"replace","interval_km":64000,"interval_days":null,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":true,"is_daily_check":false,"notes":"Handbook marks this at the 40,000 mile (64,000 km) service only."},
+    {"key":"steering","display_name":"Steering — check for free operation","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true},
+    {"key":"suspension","display_name":"Front and rear suspension","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":118,"is_warranty_relevant":false,"is_daily_check":true,"notes":"Check for damage/leaks/smooth operation."},
+
+    {"key":"battery","display_name":"Battery","action_kind":"replace","interval_km":null,"interval_days":null,"interval_source":"unverified","manual_page_ref":201,"is_warranty_relevant":false,"is_daily_check":false,"notes":"NO replacement interval in the handbook. Spec is ETZ-9 or YTX9-BS, 12 V 8 Ah (p.201). Maintenance guidance pp.162-167."},
+    {"key":"fasteners","display_name":"Fasteners — visual security inspection","action_kind":"check","interval_km":32000,"interval_days":null,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Handbook marks first service, 32,000 km and 64,000 km."},
+    {"key":"seat_latch_cable","display_name":"Seat latch cable","action_kind":"service","interval_km":16000,"interval_days":365,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":false,"notes":"Check for smooth operation, lubricate as necessary."},
+    {"key":"bank_angle_indicators","display_name":"Bank angle indicators","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":true},
+    {"key":"stand","display_name":"Centre and/or side stand","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":true},
+    {"key":"electrical_systems","display_name":"Lights, instruments and electrical systems","action_kind":"check","interval_km":null,"interval_days":1,"interval_source":"manual","manual_page_ref":119,"is_warranty_relevant":false,"is_daily_check":true}
+  ]
+}
