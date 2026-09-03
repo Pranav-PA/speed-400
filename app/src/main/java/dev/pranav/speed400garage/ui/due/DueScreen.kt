@@ -38,6 +38,7 @@ import dev.pranav.speed400garage.ui.EmptyDetail
 import dev.pranav.speed400garage.ui.ListDetailPane
 import dev.pranav.speed400garage.ui.ProvenanceBadge
 import dev.pranav.speed400garage.ui.SectionHeading
+import dev.pranav.speed400garage.ui.chart.ChartTokens
 import dev.pranav.speed400garage.ui.log.Fmt
 
 /**
@@ -227,9 +228,20 @@ private fun summaryOf(item: DueItem): String = buildString {
     if (item.isStale) append(" · estimate is stale")
 }
 
+/**
+ * Three colours for four severities, deliberately.
+ *
+ * Four warm steps were tried and failed validation: amber, orange and red sat at
+ * ΔE 10 or below for normal vision — under the floor of 15 — so a reader could not
+ * reliably tell DUE from OVERDUE by colour anyway. The row text already distinguishes
+ * them ("Overdue by 12 days" versus "300 km away"), so the honest encoding is three
+ * colours that genuinely separate, with the text carrying the fourth distinction.
+ *
+ * These three pass every check against both surfaces — see [ChartTokens].
+ */
+@Composable
 private fun colourFor(severity: Severity): Color = when (severity) {
-    Severity.OVERDUE -> Color(0xFFB3261E)
-    Severity.DUE -> Color(0xFFC2691B)
-    Severity.DUE_SOON -> Color(0xFFB79B27)
-    Severity.INFO -> Color(0xFF6FA98D)
+    Severity.OVERDUE, Severity.DUE -> ChartTokens.critical()
+    Severity.DUE_SOON -> ChartTokens.warning
+    Severity.INFO -> ChartTokens.good
 }

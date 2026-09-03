@@ -17,7 +17,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.InsertChart
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -41,9 +43,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.pranav.speed400garage.ui.chart.AnalyticsScreen
 import dev.pranav.speed400garage.ui.due.DocumentSheet
 import dev.pranav.speed400garage.ui.due.DueScreen
 import dev.pranav.speed400garage.ui.due.FaultSheet
+import dev.pranav.speed400garage.ui.due.TripReadinessScreen
 import dev.pranav.speed400garage.ui.log.DashboardV1
 import dev.pranav.speed400garage.ui.log.ExpenseSheet
 import dev.pranav.speed400garage.ui.log.FuelSheet
@@ -98,7 +102,9 @@ fun GarageApp() {
                     onLogDocument = { sheet = Sheet.Document },
                     onLogFault = { sheet = Sheet.Fault },
                 )
+                Destination.Ready -> TripReadinessScreen()
                 Destination.Due -> DueScreen()
+                Destination.Analytics -> AnalyticsScreen()
                 Destination.Timeline -> TimelineScreen(snapshot)
                 Destination.Maintenance -> MaintenanceScreen()
                 Destination.QuickSpecs -> QuickSpecsScreen()
@@ -218,7 +224,9 @@ private fun LogSheetHost(sheet: Sheet, onClose: () -> Unit) {
 
 enum class Destination(val title: String, val icon: ImageVector) {
     Dashboard("Dashboard", Icons.Filled.Dashboard),
+    Ready("Ready?", Icons.Filled.Flag),
     Due("Due", Icons.Filled.NotificationsActive),
+    Analytics("Analytics", Icons.Filled.InsertChart),
     Timeline("Timeline", Icons.Filled.History),
     Maintenance("Maintenance", Icons.Filled.Build),
     QuickSpecs("Quick Specs", Icons.AutoMirrored.Filled.MenuBook),
