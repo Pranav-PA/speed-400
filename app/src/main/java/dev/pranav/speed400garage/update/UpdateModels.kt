@@ -21,6 +21,8 @@ data class UpdateManifest(
     val sha256: String,
     val notes: String = "",
     @SerialName("released_at") val releasedAt: String? = null,
+    /** Short SHA and subject of the commit this was built from, so a release is traceable. */
+    val commit: String? = null,
 )
 
 /** Where to fetch the APK from, and how big it is if GitHub told us up front. */

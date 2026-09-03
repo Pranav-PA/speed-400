@@ -39,6 +39,26 @@ jobs:
           echo "code=$CODE" >> "$GITHUB_OUTPUT"
           echo "Building $NAME (versionCode $CODE)"
 
+      # Catches the footgun that a tag is just a label: tagging a version number
+      # before the code exists, or re-tagging, silently ships the wrong commit — and
+      # a versionCode that is not HIGHER than the published one is invisible to the
+      # in-app updater, which reads it as "up to date" and never offers the update.
+      - name: Refuse a version the app could not see as an update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          NEW=${{ steps.version.outputs.code }}
+          PREV=$(gh release download --pattern update.json --output - 2>/dev/null | jq -r '.versionCode' || echo "")
+          if [ -z "$PREV" ] || [ "$PREV" = "null" ]; then
+            echo "No previous release to compare against — first release."
+          elif [ "$NEW" -le "$PREV" ]; then
+            echo "::error::versionCode $NEW is not greater than the published $PREV. The in-app updater would read this as 'up to date' and never offer it. Tag a higher version instead of re-tagging."
+            exit 1
+          else
+            echo "versionCode $NEW > published $PREV — good."
+          fi
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -110,7 +130,8 @@ jobs:
             --arg sha256 "$SHA" \
             --arg notes "$NOTES" \
             --arg released_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{versionCode:$versionCode, versionName:$versionName, apk:$apk, sha256:$sha256, notes:$notes, released_at:$released_at}' \
+            --arg commit "$(git rev-parse --short HEAD) $(git log -1 --format=%s)" \
+            '{versionCode:$versionCode, versionName:$versionName, apk:$apk, sha256:$sha256, notes:$notes, released_at:$released_at, commit:$commit}' \
             > dist/update.json
           cat dist/update.json
 

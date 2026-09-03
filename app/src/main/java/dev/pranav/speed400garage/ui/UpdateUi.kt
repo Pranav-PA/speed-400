@@ -51,11 +51,17 @@ fun UpdatePrompt(viewModel: UpdateViewModel = hiltViewModel()) {
                     }
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "Downloads ${"%.1f".format(s.asset.sizeBytes / 1_048_576.0)} MB, then Android " +
-                            "will ask you to confirm the install. Your logged data is untouched.",
+                        "Android will ask you to confirm the install. Your logged data is untouched.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    s.manifest.commit?.let {
+                        Text(
+                            "Built from $it",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             },
             confirmButton = { Button(onClick = viewModel::download) { Text("Download") } },
