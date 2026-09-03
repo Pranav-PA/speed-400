@@ -60,6 +60,8 @@ fun TimelineScreen(
     }
 
     ListDetailPane(
+        hasSelection = selected != null,
+        onBack = { selected = null },
         list = {
             Column {
                 SectionHeading(if (searching) "Matches (${shown.size})" else "Timeline (${shown.size})")

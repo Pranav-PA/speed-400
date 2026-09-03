@@ -37,6 +37,8 @@ fun MaintenanceScreen(viewModel: GarageViewModel = hiltViewModel()) {
     var selected by remember { mutableStateOf<ComponentEntity?>(null) }
 
     ListDetailPane(
+        hasSelection = selected != null,
+        onBack = { selected = null },
         list = {
             Column {
                 SectionHeading("Components (${components.size})")

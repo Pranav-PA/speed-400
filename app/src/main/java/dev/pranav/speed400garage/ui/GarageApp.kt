@@ -24,12 +24,17 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,11 +65,18 @@ import dev.pranav.speed400garage.ui.log.TimelineScreen
 import dev.pranav.speed400garage.ui.log.ValidationDialog
 
 /**
- * The app shell.
+ * The app shell, adaptive.
  *
- * Tablet-only, landscape-first, fixed panes (§4.1). There is deliberately no
- * `WindowSizeClass` anywhere in this codebase: a permanent navigation rail on the left
- * and a two-pane list/detail body is THE layout, not one branch of a responsive one.
+ * This reverses plan §4.1's tablet-only decision, deliberately and for a reason: §4.1
+ * chose one device and invented the Capture Inbox to bridge the gap between where data
+ * is created (roadside) and where it was entered (at home). With the Inbox cut, that
+ * bridge is gone, so the phone has to be a real client rather than a camera feeding one.
+ *
+ * What replaces it is not a compromise layout. Wide screens keep exactly what they had
+ * — a permanent rail and two panes side by side. Narrow screens get a bottom bar and
+ * one pane at a time, which is what a phone actually wants. The branch happens in two
+ * places only ([GarageApp] and [ListDetailPane]), so no individual screen has to know
+ * how wide it is.
  */
 @Composable
 fun GarageApp() {
@@ -80,19 +92,16 @@ fun GarageApp() {
     val stateViewModel: GarageStateViewModel = hiltViewModel()
     val snapshot by stateViewModel.snapshot.collectAsStateWithLifecycle()
 
-    Row(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        NavigationRail {
-            Destination.entries.forEach { d ->
-                NavigationRailItem(
-                    selected = destination == d,
-                    onClick = { destination = d },
-                    icon = { Icon(d.icon, contentDescription = d.title) },
-                    label = { Text(d.title) },
-                )
-            }
-        }
-        Box(Modifier.fillMaxSize().padding(24.dp)) {
-            when (destination) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        val compact = maxWidth < COMPACT_WIDTH_DP.dp
+
+        CompositionLocalProvider(LocalIsCompact provides compact) {
+            AdaptiveChrome(
+                compact = compact,
+                destination = destination,
+                onDestination = { destination = it },
+            ) {
+                when (destination) {
                 Destination.Dashboard -> DashboardV1(
                     snapshot = snapshot,
                     onLogFuel = { sheet = Sheet.Fuel },
@@ -107,12 +116,64 @@ fun GarageApp() {
                 Destination.Timeline -> TimelineScreen(snapshot)
                 Destination.Analytics -> AnalyticsScreen()
                 Destination.Bike -> BikeReferenceScreen()
-                Destination.Settings -> SettingsScreen()
+                    Destination.Settings -> SettingsScreen()
+                }
             }
+
+            sheet?.let { LogSheetHost(it) { sheet = null } }
         }
     }
+}
 
-    sheet?.let { LogSheetHost(it) { sheet = null } }
+/**
+ * Rail beside the content on a wide screen, bottom bar under it on a narrow one.
+ *
+ * A rail on a phone would eat a quarter of the width; a bottom bar on a tablet wastes
+ * the vertical space that makes a tablet worth using. Neither is a fallback for the
+ * other — they are the right answer for their own shape.
+ */
+@Composable
+private fun AdaptiveChrome(
+    compact: Boolean,
+    destination: Destination,
+    onDestination: (Destination) -> Unit,
+    content: @Composable () -> Unit,
+) {
+    if (compact) {
+        Column(Modifier.fillMaxSize()) {
+            Box(Modifier.fillMaxWidth().weight(1f).padding(horizontal = 12.dp, vertical = 8.dp)) {
+                content()
+            }
+            NavigationBar {
+                Destination.entries.forEach { d ->
+                    NavigationBarItem(
+                        selected = destination == d,
+                        onClick = { onDestination(d) },
+                        icon = { Icon(d.icon, contentDescription = d.title) },
+                        // Labels only on the selected item: seven labels across a phone
+                        // truncate to noise, and the icon plus the selected label is
+                        // enough to know where you are.
+                        label = { Text(d.title) },
+                        alwaysShowLabel = false,
+                    )
+                }
+            }
+        }
+    } else {
+        Row(Modifier.fillMaxSize()) {
+            NavigationRail {
+                Destination.entries.forEach { d ->
+                    NavigationRailItem(
+                        selected = destination == d,
+                        onClick = { onDestination(d) },
+                        icon = { Icon(d.icon, contentDescription = d.title) },
+                        label = { Text(d.title) },
+                    )
+                }
+            }
+            Box(Modifier.fillMaxSize().padding(24.dp)) { content() }
+        }
+    }
 }
 
 enum class Sheet { Fuel, Expense, Odometer, Service, Document, Fault }
@@ -242,16 +303,47 @@ enum class Destination(val title: String, val icon: ImageVector) {
 }
 
 /**
- * The fixed two-pane body every screen in this app uses: a list on the left, the
- * selected item's detail on the right. Both panes are always present — on a tablet in
- * landscape there is no reason to hide one, and hiding one is what forces the
- * responsive branching §4.1 rules out.
+ * List and detail, side by side where there is room and one at a time where there
+ * isn't.
+ *
+ * On a wide screen both panes are always present — there is no reason to hide one, and
+ * a detail that appears beside the list you picked from is genuinely better.
+ *
+ * On a narrow screen the list fills the screen until something is selected, then the
+ * detail takes over with a back affordance and the system back button wired up. The
+ * alternative — squeezing both into a phone width — gives you two unusable columns
+ * instead of one good one.
+ *
+ * @param hasSelection whether [detail] currently has something to show. Callers own
+ *   their selection state, so they have to say; a pane that guessed would get it wrong.
+ * @param onBack clears that selection.
  */
 @Composable
 fun ListDetailPane(
+    hasSelection: Boolean = true,
+    onBack: () -> Unit = {},
     list: @Composable () -> Unit,
     detail: @Composable () -> Unit,
 ) {
+    if (LocalIsCompact.current) {
+        if (hasSelection) {
+            BackHandler(onBack = onBack)
+            Column(Modifier.fillMaxSize()) {
+                TextButton(onClick = onBack) { Text("‹  Back") }
+                Surface(
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                    color = MaterialTheme.colorScheme.surface,
+                ) { Box(Modifier.padding(16.dp)) { detail() } }
+            }
+        } else {
+            Surface(
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                color = MaterialTheme.colorScheme.surface,
+            ) { Box(Modifier.padding(12.dp)) { list() } }
+        }
+        return
+    }
+
     Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
         Surface(
             modifier = Modifier.width(400.dp).fillMaxHeight().clip(RoundedCornerShape(12.dp)),

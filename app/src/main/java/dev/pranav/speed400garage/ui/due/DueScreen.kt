@@ -57,6 +57,8 @@ fun DueScreen(viewModel: DueViewModel = hiltViewModel()) {
     val digest = state.items.filter { it.notifyClass == NotifyClass.DIGEST }
 
     ListDetailPane(
+        hasSelection = selected != null,
+        onBack = { selected = null },
         list = {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 item {

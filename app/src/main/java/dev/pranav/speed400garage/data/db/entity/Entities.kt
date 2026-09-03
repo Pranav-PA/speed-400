@@ -302,8 +302,15 @@ data class AttachmentEntity(
 )
 
 /**
- * Plan §5.2 — the Capture Inbox. On a tablet-only build this is the app's only route in,
- * so an imported image lands here first and is structured later.
+ * Plan §5.2 — the Capture Inbox.
+ *
+ * The table exists; the feature does not. §5.2 called this the app's only route in,
+ * which was true only while the app was tablet-only and the tablet was never at the
+ * petrol pump. The app now runs on a phone, so entries are typed where they happen and
+ * the Inbox's whole reason for existing went with the tablet-only decision.
+ *
+ * Left in place rather than dropped: removing it is a migration on a ten-year database
+ * to reclaim an empty table, which is a worse trade than an unused one.
  */
 @Entity(tableName = "capture_inbox", indices = [Index("status"), Index("importedAt")])
 data class CaptureInboxEntity(

@@ -37,6 +37,8 @@ fun QuickSpecsScreen(viewModel: GarageViewModel = hiltViewModel()) {
     var selected by remember { mutableStateOf<FactEntity?>(null) }
 
     ListDetailPane(
+        hasSelection = selected != null,
+        onBack = { selected = null },
         list = {
             Column {
                 SectionHeading("Specifications (${facts.size})")

@@ -2,12 +2,15 @@ package dev.pranav.speed400garage.ui.log
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -30,6 +33,7 @@ import dev.pranav.speed400garage.ui.ProvenanceBadge
  * that mixes measured and estimated figures without saying which is which is how a
  * remembered number ends up trusted when it should not be (§3 P4).
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DashboardV1(
     snapshot: GarageSnapshot,
@@ -45,7 +49,13 @@ fun DashboardV1(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // 1. Quick actions — never more than one tap away (§7.1).
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // FlowRow, not Row: six buttons fit one line on a tablet and wrap to two or
+        // three on a phone. A Row would push the last of them off the screen, which on
+        // a phone means the odometer button — the one thing §5.1 needs most.
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Button(onClick = onLogFuel) { Text("⛽  Fuel") }
             Button(onClick = onLogExpense) { Text("₹  Expense") }
             Button(onClick = onLogService) { Text("🔧  Service / part") }
@@ -66,7 +76,10 @@ fun DashboardV1(
         OdometerCard(snapshot)
 
         // 3. The numbers that answer "how is it doing".
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
             StatCard(
                 label = "Mileage",
                 value = Fmt.kmpl(snapshot.economy?.rollingKmpl),
@@ -180,7 +193,7 @@ private fun CostCard(cost: dev.pranav.speed400garage.domain.engine.CostPerKm) {
 @Composable
 private fun CostRow(label: String, value: String, caption: String, provenance: Provenance) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        Column(Modifier.width(220.dp)) {
+        Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.bodyLarge)
             Text(caption, style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -192,7 +205,9 @@ private fun CostRow(label: String, value: String, caption: String, provenance: P
 
 @Composable
 private fun StatCard(label: String, value: String, caption: String, provenance: Provenance) {
-    Card(Modifier.width(260.dp)) {
+    // A range rather than a fixed width, so three sit side by side on a tablet and
+    // stack readably on a phone instead of being clipped.
+    Card(Modifier.widthIn(min = 170.dp, max = 280.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(label, style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)

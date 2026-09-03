@@ -1,7 +1,7 @@
 # Speed 400 Garage
 
-A personal Android **tablet** app that is the long-term digital memory of one
-motorcycle: a 2024 Triumph Speed 400.
+A personal Android app — phone and tablet — that is the long-term digital memory of
+one motorcycle: a 2024 Triumph Speed 400.
 
 > I should never have to remember anything about my bike.
 
@@ -42,16 +42,16 @@ interval in it traces to a page number in the handbook.*
 | §3 P4 — provenance is first-class | `Provenance` + `ProvenanceBadge`, rendered next to every interval and specification. An unknown source falls to ⚪, never up to 🟢. |
 | §3 P5 — never invent a safety number | `SafetyRule.isCitable` requires both a manual source and a page number. `SeedIntegrityTest` fails the build if a safety-critical fact lacks either. |
 | §3 P6 — the data outlives the device | No `fallbackToDestructiveMigration`. Room schemas are exported to `app/schemas/` and committed. |
-| §4.1 — tablet only | No `WindowSizeClass` anywhere. A permanent navigation rail and a fixed two-pane `ListDetailPane` *are* the layout. |
+| §4.1 — revisited | Tablet-only was the plan's decision, paired with a Capture Inbox to bridge "photographed at the pump, entered at home". The Inbox was cut, so the bridge went with it and the phone became a real client. Wide screens keep the rail and two panes; narrow ones get a bottom bar and one pane at a time. The branch lives in two places, not in every screen. |
 | §4.2 — money lives in one place | Every total is a `SUM(line_item.amount)` over a filter. Amounts are integer paise. |
 | §12 — nothing phones home | Android auto-backup and device-transfer are both disabled; no analytics or crash SDK. |
 
-## Installing it on the tablet
+## Installing it
 
 You sideload the APK **once**. After that the app updates itself: it notices new
 GitHub Releases, verifies the download's checksum, and hands it to Android's installer
 — your data carries across untouched, because an update is not a reinstall. Nothing to
-configure on the tablet; the repository is public, so the app needs no credentials.
+configure on the device; the repository is public, so the app needs no credentials.
 
 Shipping a new version is one command:
 

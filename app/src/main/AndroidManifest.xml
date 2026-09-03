@@ -3,15 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      Tablet-only (plan §4.1). This app is never built for a phone: there is no
-      compact layout and no WindowSizeClass branching anywhere in the codebase.
+      Runs on a phone as well as a tablet.
+      
+      Plan §4.1 chose tablet-only and invented the Capture Inbox to compensate for the
+      tablet not being at the petrol pump. With the Inbox cut, that compensation is
+      gone — so the phone has to be a real client rather than a camera that feeds one.
+      The layout adapts instead: rail and two panes on a wide screen, bottom bar and
+      one pane at a time on a narrow one.
     -->
     <supports-screens
-        android:smallScreens="false"
-        android:normalScreens="false"
+        android:smallScreens="true"
+        android:normalScreens="true"
         android:largeScreens="true"
-        android:xlargeScreens="true"
-        android:requiresSmallestWidthDp="600" />
+        android:xlargeScreens="true" />
 
     <!-- Update checks only. Nothing about the motorcycle is ever sent (plan §12). -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -40,7 +44,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="userLandscape"
+            android:screenOrientation="fullUser"
             android:resizeableActivity="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|density|uiMode"
             android:label="@string/app_name"
