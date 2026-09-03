@@ -35,9 +35,9 @@ class UpdateViewModel @Inject constructor(
 
     private var job: Job? = null
 
-    /** Called once on launch. Silent when switched off or not yet configured. */
+    /** Called once on launch. Silent unless there is genuinely something to act on. */
     fun checkOnLaunch() {
-        if (!settings.autoCheck || !settings.hasToken()) return
+        if (!settings.autoCheck) return
         check()
     }
 

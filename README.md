@@ -50,7 +50,8 @@ interval in it traces to a page number in the handbook.*
 
 You sideload the APK **once**. After that the app updates itself: it notices new
 GitHub Releases, verifies the download's checksum, and hands it to Android's installer
-— your data carries across untouched, because an update is not a reinstall.
+— your data carries across untouched, because an update is not a reinstall. Nothing to
+configure on the tablet; the repository is public, so the app needs no credentials.
 
 Shipping a new version is one command:
 
@@ -59,9 +60,8 @@ git tag v0.2.0 -m "Fuel logging and the economy engine"
 git push origin v0.2.0
 ```
 
-Full setup — signing key, the read-only GitHub token the app needs to see releases of
-a private repo, and what the update check does and does not send — is in
-[`docs/releasing.md`](docs/releasing.md).
+Full setup — creating the signing key, cutting the first release, and what the update
+check does and does not send — is in [`docs/releasing.md`](docs/releasing.md).
 
 ## Building
 
@@ -73,8 +73,8 @@ echo "sdk.dir=/path/to/Android/sdk" > local.properties
 ./gradlew :app:testDebugUnitTest # the seed-integrity and provenance tests
 ```
 
-`local.properties`, the signing keystore, the GitHub token and the Gemini API key are
-all gitignored or stored encrypted on-device, and must stay that way (§14).
+`local.properties`, the signing keystore and the Gemini API key are all gitignored or
+stored encrypted on-device, and must stay that way (§14).
 
 > **The signing keystore is the one irreplaceable file in this project.** Android
 > refuses to install an update signed with a different key, so losing it means the only

@@ -46,8 +46,7 @@ object AppModule {
     fun provideUpdateInstaller(
         @ApplicationContext context: Context,
         checker: UpdateChecker,
-        settings: UpdateSettings,
-    ): UpdateInstaller = UpdateInstaller(context, checker, settings)
+    ): UpdateInstaller = UpdateInstaller(context, checker)
 
     @Provides fun provideBikeDao(db: GarageDatabase): BikeDao = db.bikeDao()
     @Provides fun provideEventDao(db: GarageDatabase): EventDao = db.eventDao()

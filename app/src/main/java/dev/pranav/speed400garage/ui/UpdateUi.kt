@@ -102,12 +102,9 @@ fun UpdatePrompt(viewModel: UpdateViewModel = hiltViewModel()) {
             dismissButton = { TextButton(onClick = viewModel::dismiss) { Text("Later") } },
         )
 
-        is UpdateState.Failed -> if (!s.needsToken) AlertDialog(
-            onDismissRequest = viewModel::dismiss,
-            title = { Text("Update check failed") },
-            text = { Text(s.message) },
-            confirmButton = { TextButton(onClick = viewModel::dismiss) { Text("OK") } },
-        )
+        // A failed check is reported in Settings, not as a dialog over the dashboard:
+        // no network at the petrol pump is normal, and it is not worth interrupting for.
+        is UpdateState.Failed -> Unit
 
         UpdateState.Checking, UpdateState.Idle, UpdateState.UpToDate -> Unit
     }
@@ -119,7 +116,6 @@ private fun Context.launch(intent: Intent) = runCatching { startActivity(intent)
 @Composable
 fun UpdateSettingsCard(viewModel: UpdateViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val hasToken by viewModel.hasToken.collectAsStateWithLifecycle()
     val autoCheck by viewModel.autoCheck.collectAsStateWithLifecycle()
 
     Card(Modifier.fillMaxWidth()) {
@@ -128,17 +124,15 @@ fun UpdateSettingsCard(viewModel: UpdateViewModel = hiltViewModel()) {
             Text("Installed: ${viewModel.currentVersion}", style = MaterialTheme.typography.bodyMedium)
 
             Text(
-                "The repository is private, so checking for a new build needs a GitHub token " +
-                    "with read access to it. The token is stored encrypted on this tablet and is " +
-                    "the only thing sent — no data about the bike ever leaves the device.",
+                "New versions are published as GitHub releases and installed from inside the " +
+                    "app. The check sends an HTTP request and nothing else — no data about the " +
+                    "bike ever leaves this tablet.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            GitHubTokenField(hasToken = hasToken, onSave = viewModel::setToken)
-
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = viewModel::check, enabled = hasToken && state !is UpdateState.Checking) {
+                Button(onClick = viewModel::check, enabled = state !is UpdateState.Checking) {
                     Text(if (state is UpdateState.Checking) "Checking…" else "Check now")
                 }
                 TextButton(onClick = { viewModel.setAutoCheck(!autoCheck) }) {
@@ -151,6 +145,10 @@ fun UpdateSettingsCard(viewModel: UpdateViewModel = hiltViewModel()) {
                 is UpdateState.Failed -> Text(s.message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
                 else -> Unit
             }
+
+            // Only needed if the repository is ever made private again — private release
+            // assets are not reachable without credentials.
+            OptionalTokenField(onSave = viewModel::setToken)
         }
     }
 }

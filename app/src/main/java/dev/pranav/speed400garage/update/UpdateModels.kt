@@ -23,25 +23,8 @@ data class UpdateManifest(
     @SerialName("released_at") val releasedAt: String? = null,
 )
 
-@Serializable
-internal data class GitHubRelease(
-    @SerialName("tag_name") val tagName: String,
-    val name: String? = null,
-    val body: String? = null,
-    val draft: Boolean = false,
-    val prerelease: Boolean = false,
-    val assets: List<GitHubAsset> = emptyList(),
-)
-
-@Serializable
-internal data class GitHubAsset(
-    val id: Long,
-    val name: String,
-    val size: Long,
-    /** API URL — the one that works for a PRIVATE repo, given a token. */
-    val url: String,
-    @SerialName("browser_download_url") val browserDownloadUrl: String,
-)
+/** Where to fetch the APK from, and how big it is if GitHub told us up front. */
+data class ReleaseAsset(val url: String, val sizeBytes: Long)
 
 /** What the UI renders. */
 sealed interface UpdateState {
@@ -51,8 +34,5 @@ sealed interface UpdateState {
     data class Available(val manifest: UpdateManifest, val asset: ReleaseAsset) : UpdateState
     data class Downloading(val manifest: UpdateManifest, val fraction: Float) : UpdateState
     data class ReadyToInstall(val manifest: UpdateManifest, val path: String) : UpdateState
-    /** [needsToken] distinguishes "you haven't set this up yet" from a genuine failure. */
-    data class Failed(val message: String, val needsToken: Boolean = false) : UpdateState
+    data class Failed(val message: String) : UpdateState
 }
-
-data class ReleaseAsset(val apiUrl: String, val browserUrl: String, val sizeBytes: Long)

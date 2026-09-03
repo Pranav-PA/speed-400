@@ -20,17 +20,16 @@ import kotlin.coroutines.coroutineContext
  * Two things make this safe enough to run on a tablet holding a ten-year record:
  *
  *  1. The download is verified against the SHA-256 in the manifest BEFORE the file is
- *     offered to the installer. A mismatch deletes the file and fails.
+ *     offered to the installer. A mismatch deletes the file and fails loudly.
  *  2. Android refuses to install an APK signed with a different key than the installed
  *     app, so a release built with the wrong key fails at install time rather than
- *     replacing the app. That is a feature: see docs/releasing.md on why the signing
+ *     replacing the app. That is a feature — see docs/releasing.md on why the signing
  *     keystore must never be regenerated.
  */
 @Singleton
 class UpdateInstaller @Inject constructor(
     private val context: Context,
     private val checker: UpdateChecker,
-    private val settings: UpdateSettings,
 ) {
 
     suspend fun download(
@@ -38,15 +37,14 @@ class UpdateInstaller @Inject constructor(
         asset: ReleaseAsset,
         onProgress: (Float) -> Unit,
     ): File = withContext(Dispatchers.IO) {
-        val token = settings.token() ?: throw IllegalStateException("No GitHub token set")
         val dir = File(context.filesDir, UPDATE_DIR).apply { mkdirs() }
-        // One update in flight at a time; stale part-files are never reused.
+        // One update in flight at a time; a stale part-file is never reused.
         dir.listFiles()?.forEach { it.delete() }
         val target = File(dir, manifest.apk)
 
         val digest = MessageDigest.getInstance("SHA-256")
         var read = 0L
-        checker.openAssetStream(asset.apiUrl, token).use { input ->
+        checker.open(asset.url).use { input ->
             target.outputStream().use { output ->
                 val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                 while (true) {
