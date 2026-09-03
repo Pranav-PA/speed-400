@@ -277,6 +277,40 @@ interface CostDao {
 }
 
 @Dao
+interface SearchDao {
+    /**
+     * Full-text search across every event's title and notes (§7.7).
+     *
+     * The MATCH query is wrapped so a bare word behaves like a prefix search — typing
+     * "brak" should find "brake pads" long before you finish the word. Anything that
+     * would be a syntax error in FTS is caught by the caller and degraded to a LIKE
+     * scan rather than throwing: a search box that crashes on an apostrophe is worse
+     * than a slow one.
+     */
+    @Query(
+        """
+        SELECT e.* FROM event e
+        JOIN event_fts ON event_fts.rowid = e.rowid
+        WHERE e.bikeId = :bikeId AND event_fts MATCH :query
+        ORDER BY e.occurredAt DESC
+        """
+    )
+    suspend fun search(bikeId: String, query: String): List<EventEntity>
+
+    /** Fallback for input FTS would reject, and for substring matches mid-word. */
+    @Query(
+        """
+        SELECT * FROM event
+        WHERE bikeId = :bikeId
+          AND (title LIKE '%' || :text || '%' OR notes LIKE '%' || :text || '%')
+        ORDER BY occurredAt DESC
+        LIMIT 200
+        """
+    )
+    suspend fun searchLike(bikeId: String, text: String): List<EventEntity>
+}
+
+@Dao
 interface SettingDao {
     @Upsert suspend fun put(setting: SettingEntity)
 

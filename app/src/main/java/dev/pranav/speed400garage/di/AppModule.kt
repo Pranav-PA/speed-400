@@ -16,6 +16,7 @@ import dev.pranav.speed400garage.data.db.dao.CostDao
 import dev.pranav.speed400garage.data.db.dao.DocumentDao
 import dev.pranav.speed400garage.data.db.dao.FactDao
 import dev.pranav.speed400garage.data.db.dao.FaultDao
+import dev.pranav.speed400garage.data.db.dao.SearchDao
 import dev.pranav.speed400garage.data.db.dao.FuelDao
 import dev.pranav.speed400garage.data.db.dao.OdometerDao
 import dev.pranav.speed400garage.data.backup.BackupManager
@@ -36,6 +37,7 @@ object AppModule {
         Room.databaseBuilder(context, GarageDatabase::class.java, GarageDatabase.NAME)
             // No fallbackToDestructiveMigration: this is a ten-year record (§3 P6).
             // A missing migration must fail loudly in development, never wipe the device.
+            .addMigrations(GarageDatabase.MIGRATION_1_2)
             .build()
 
     @Provides @Singleton
@@ -71,5 +73,6 @@ object AppModule {
     @Provides fun provideCostDao(db: GarageDatabase): CostDao = db.costDao()
     @Provides fun provideDocumentDao(db: GarageDatabase): DocumentDao = db.documentDao()
     @Provides fun provideFaultDao(db: GarageDatabase): FaultDao = db.faultDao()
+    @Provides fun provideSearchDao(db: GarageDatabase): SearchDao = db.searchDao()
     @Provides fun provideComponentActionDao(db: GarageDatabase): dev.pranav.speed400garage.data.db.dao.ComponentActionDao = db.componentActionDao()
 }

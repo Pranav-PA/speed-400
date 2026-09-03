@@ -20,7 +20,9 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.InsertChart
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -47,7 +49,9 @@ import dev.pranav.speed400garage.ui.chart.AnalyticsScreen
 import dev.pranav.speed400garage.ui.due.DocumentSheet
 import dev.pranav.speed400garage.ui.due.DueScreen
 import dev.pranav.speed400garage.ui.due.FaultSheet
+import dev.pranav.speed400garage.ui.due.BuildSheetScreen
 import dev.pranav.speed400garage.ui.due.TripReadinessScreen
+import dev.pranav.speed400garage.ui.search.SearchScreen
 import dev.pranav.speed400garage.ui.log.DashboardV1
 import dev.pranav.speed400garage.ui.log.ExpenseSheet
 import dev.pranav.speed400garage.ui.log.FuelSheet
@@ -106,8 +110,10 @@ fun GarageApp() {
                 Destination.Due -> DueScreen()
                 Destination.Analytics -> AnalyticsScreen()
                 Destination.Timeline -> TimelineScreen(snapshot)
+                Destination.Search -> SearchScreen()
                 Destination.Maintenance -> MaintenanceScreen()
                 Destination.QuickSpecs -> QuickSpecsScreen()
+                Destination.BuildSheet -> BuildSheetScreen()
                 Destination.Settings -> SettingsScreen()
             }
         }
@@ -228,8 +234,10 @@ enum class Destination(val title: String, val icon: ImageVector) {
     Due("Due", Icons.Filled.NotificationsActive),
     Analytics("Analytics", Icons.Filled.InsertChart),
     Timeline("Timeline", Icons.Filled.History),
+    Search("Search", Icons.Filled.Search),
     Maintenance("Maintenance", Icons.Filled.Build),
     QuickSpecs("Quick Specs", Icons.AutoMirrored.Filled.MenuBook),
+    BuildSheet("Build sheet", Icons.AutoMirrored.Filled.Article),
     Settings("Settings", Icons.Filled.Settings),
 }
 

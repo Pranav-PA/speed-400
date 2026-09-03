@@ -14,6 +14,7 @@ import dev.pranav.speed400garage.data.db.dao.EventWriteDao
 import dev.pranav.speed400garage.data.db.dao.FuelDao
 import dev.pranav.speed400garage.data.db.dao.FactDao
 import dev.pranav.speed400garage.data.db.dao.FaultDao
+import dev.pranav.speed400garage.data.db.dao.SearchDao
 import dev.pranav.speed400garage.data.db.dao.LineItemDao
 import dev.pranav.speed400garage.data.db.dao.OdometerDao
 import dev.pranav.speed400garage.data.db.dao.SettingDao
@@ -24,6 +25,7 @@ import dev.pranav.speed400garage.data.db.entity.ComponentActionEntity
 import dev.pranav.speed400garage.data.db.entity.ComponentEntity
 import dev.pranav.speed400garage.data.db.entity.DocumentEntity
 import dev.pranav.speed400garage.data.db.entity.EventEntity
+import dev.pranav.speed400garage.data.db.entity.EventFts
 import dev.pranav.speed400garage.data.db.entity.FactEntity
 import dev.pranav.speed400garage.data.db.entity.FaultEntity
 import dev.pranav.speed400garage.data.db.entity.FuelEntryEntity
@@ -39,6 +41,7 @@ import dev.pranav.speed400garage.data.db.entity.VendorEntity
     entities = [
         BikeEntity::class,
         EventEntity::class,
+        EventFts::class,
         LineItemEntity::class,
         FuelEntryEntity::class,
         OdometerReadingEntity::class,
@@ -55,7 +58,7 @@ import dev.pranav.speed400garage.data.db.entity.VendorEntity
         FactEntity::class,
         SettingEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class GarageDatabase : RoomDatabase() {
@@ -74,8 +77,25 @@ abstract class GarageDatabase : RoomDatabase() {
     abstract fun fuelDao(): FuelDao
     abstract fun costDao(): CostDao
     abstract fun faultDao(): FaultDao
+    abstract fun searchDao(): SearchDao
 
     companion object {
         const val NAME = "speed400_garage.db"
+
+        /**
+         * Adds the full-text index over events. Written by hand rather than left to a
+         * destructive fallback: this database is a ten-year record (§3 P6), and losing
+         * it to a schema bump would be the single worst bug this app could have.
+         */
+        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE VIRTUAL TABLE IF NOT EXISTS `event_fts` USING FTS4(" +
+                        "`title` TEXT, `notes` TEXT, content=`event`)"
+                )
+                // Backfill the index from the rows that already exist.
+                db.execSQL("INSERT INTO `event_fts`(`event_fts`) VALUES('rebuild')")
+            }
+        }
     }
 }
