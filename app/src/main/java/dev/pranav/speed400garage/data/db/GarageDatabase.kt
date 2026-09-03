@@ -88,37 +88,6 @@ abstract class GarageDatabase : RoomDatabase() {
     companion object {
         const val NAME = "speed400_garage.db"
 
-        /**
-         * Adds the full-text index over events. Written by hand rather than left to a
-         * destructive fallback: this database is a ten-year record (§3 P6), and losing
-         * it to a schema bump would be the single worst bug this app could have.
-         */
-        /** Adds the handbook corpus and its full-text index. */
-        val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
-            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `handbook_chunk` (" +
-                        "`id` TEXT NOT NULL, `page` INTEGER NOT NULL, `ordinal` INTEGER NOT NULL, " +
-                        "`text` TEXT NOT NULL, `section` TEXT, `createdAt` INTEGER NOT NULL, " +
-                        "`updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))"
-                )
-                db.execSQL("CREATE INDEX IF NOT EXISTS `index_handbook_chunk_page` ON `handbook_chunk` (`page`)")
-                db.execSQL(
-                    "CREATE VIRTUAL TABLE IF NOT EXISTS `handbook_chunk_fts` USING FTS4(" +
-                        "`text` TEXT, `section` TEXT, content=`handbook_chunk`)"
-                )
-            }
-        }
-
-        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
-            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-                db.execSQL(
-                    "CREATE VIRTUAL TABLE IF NOT EXISTS `event_fts` USING FTS4(" +
-                        "`title` TEXT, `notes` TEXT, content=`event`)"
-                )
-                // Backfill the index from the rows that already exist.
-                db.execSQL("INSERT INTO `event_fts`(`event_fts`) VALUES('rebuild')")
-            }
-        }
+        /** See [Migrations] — the SQL lives there so it can be executed by a test. */
     }
 }

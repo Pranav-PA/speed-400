@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.pranav.speed400garage.data.db.GarageDatabase
+import dev.pranav.speed400garage.data.db.Migrations
 import dev.pranav.speed400garage.data.db.dao.BikeDao
 import dev.pranav.speed400garage.data.db.dao.CaptureInboxDao
 import dev.pranav.speed400garage.data.db.dao.ComponentDao
@@ -39,7 +40,7 @@ object AppModule {
         Room.databaseBuilder(context, GarageDatabase::class.java, GarageDatabase.NAME)
             // No fallbackToDestructiveMigration: this is a ten-year record (§3 P6).
             // A missing migration must fail loudly in development, never wipe the device.
-            .addMigrations(GarageDatabase.MIGRATION_1_2, GarageDatabase.MIGRATION_2_3)
+            .addMigrations(*Migrations.ALL)
             .build()
 
     @Provides @Singleton
