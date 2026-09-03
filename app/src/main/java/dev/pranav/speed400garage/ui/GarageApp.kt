@@ -16,14 +16,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.InsertChart
-import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -50,10 +46,8 @@ import dev.pranav.speed400garage.ui.chart.AnalyticsScreen
 import dev.pranav.speed400garage.ui.due.DocumentSheet
 import dev.pranav.speed400garage.ui.due.DueScreen
 import dev.pranav.speed400garage.ui.due.FaultSheet
-import dev.pranav.speed400garage.ui.due.BuildSheetScreen
-import dev.pranav.speed400garage.ui.due.TripReadinessScreen
+import dev.pranav.speed400garage.ui.due.BikeReferenceScreen
 import dev.pranav.speed400garage.ui.assistant.AssistantScreen
-import dev.pranav.speed400garage.ui.search.SearchScreen
 import dev.pranav.speed400garage.ui.log.DashboardV1
 import dev.pranav.speed400garage.ui.log.ExpenseSheet
 import dev.pranav.speed400garage.ui.log.FuelSheet
@@ -108,15 +102,11 @@ fun GarageApp() {
                     onLogDocument = { sheet = Sheet.Document },
                     onLogFault = { sheet = Sheet.Fault },
                 )
-                Destination.Ready -> TripReadinessScreen()
-                Destination.Assistant -> AssistantScreen()
                 Destination.Due -> DueScreen()
-                Destination.Analytics -> AnalyticsScreen()
+                Destination.Assistant -> AssistantScreen()
                 Destination.Timeline -> TimelineScreen(snapshot)
-                Destination.Search -> SearchScreen()
-                Destination.Maintenance -> MaintenanceScreen()
-                Destination.QuickSpecs -> QuickSpecsScreen()
-                Destination.BuildSheet -> BuildSheetScreen()
+                Destination.Analytics -> AnalyticsScreen()
+                Destination.Bike -> BikeReferenceScreen()
                 Destination.Settings -> SettingsScreen()
             }
         }
@@ -231,17 +221,23 @@ private fun LogSheetHost(sheet: Sheet, onClose: () -> Unit) {
     }
 }
 
+/**
+ * Seven destinations, down from eleven.
+ *
+ * The rail grew a tab per phase until it stopped being scannable, which is its own
+ * kind of bug — an app you have to search for the right tab in is not a fast app.
+ * Nothing was removed: readiness moved onto the dashboard because "can I ride
+ * tomorrow" is a home-screen question, search moved into the timeline because
+ * searching the log and reading it are one activity, and the three reference screens
+ * became panes of one Bike screen because they are all the same kind of thing.
+ */
 enum class Destination(val title: String, val icon: ImageVector) {
     Dashboard("Dashboard", Icons.Filled.Dashboard),
-    Ready("Ready?", Icons.Filled.Flag),
-    Assistant("Ask", Icons.AutoMirrored.Filled.Chat),
     Due("Due", Icons.Filled.NotificationsActive),
-    Analytics("Analytics", Icons.Filled.InsertChart),
+    Assistant("Ask", Icons.AutoMirrored.Filled.Chat),
     Timeline("Timeline", Icons.Filled.History),
-    Search("Search", Icons.Filled.Search),
-    Maintenance("Maintenance", Icons.Filled.Build),
-    QuickSpecs("Quick Specs", Icons.AutoMirrored.Filled.MenuBook),
-    BuildSheet("Build sheet", Icons.AutoMirrored.Filled.Article),
+    Analytics("Analytics", Icons.Filled.InsertChart),
+    Bike("Bike", Icons.AutoMirrored.Filled.MenuBook),
     Settings("Settings", Icons.Filled.Settings),
 }
 

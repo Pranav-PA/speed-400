@@ -92,6 +92,14 @@ fun DashboardV1(
             )
         }
 
+        // Folded in from what used to be its own tab. "Can I ride tomorrow?" is a
+        // home-screen question, not a destination you navigate to.
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                dev.pranav.speed400garage.ui.due.ReadinessCard()
+            }
+        }
+
         snapshot.cost?.let { CostCard(it) }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.pranav.speed400garage.ui.search.SearchViewModel
 import dev.pranav.speed400garage.data.db.entity.EventEntity
 import dev.pranav.speed400garage.ui.EmptyDetail
 import dev.pranav.speed400garage.ui.ListDetailPane
@@ -35,18 +39,39 @@ import dev.pranav.speed400garage.ui.SectionHeading
  * it is the same rows those are computed from.
  */
 @Composable
-fun TimelineScreen(snapshot: GarageSnapshot) {
+fun TimelineScreen(
+    snapshot: GarageSnapshot,
+    search: SearchViewModel = hiltViewModel(),
+) {
     var filter by remember { mutableStateOf<String?>(null) }
     var selected by remember { mutableStateOf<EventEntity?>(null) }
+    val searchState by search.state.collectAsStateWithLifecycle()
 
-    val shown = remember(snapshot.events, filter) {
-        if (filter == null) snapshot.events else snapshot.events.filter { it.type == filter }
+    // Search used to be its own tab, which never made sense: searching the log and
+    // reading the log are the same activity, and a separate destination just meant
+    // deciding which one you wanted before you started.
+    val searching = searchState.query.isNotBlank()
+    val shown = remember(snapshot.events, filter, searchState.results, searching) {
+        when {
+            searching -> searchState.results
+            filter == null -> snapshot.events
+            else -> snapshot.events.filter { it.type == filter }
+        }
     }
 
     ListDetailPane(
         list = {
             Column {
-                SectionHeading("Timeline (${shown.size})")
+                SectionHeading(if (searching) "Matches (${shown.size})" else "Timeline (${shown.size})")
+                OutlinedTextField(
+                    value = searchState.query,
+                    onValueChange = search::onQueryChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text("Search titles and notes") },
+                    placeholder = { Text("rattle, brake pads, that workshop…") },
+                )
+                Spacer(Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(filter == null, { filter = null }, { Text("All") })
                     FilterChip(filter == "fuel", { filter = "fuel" }, { Text("Fuel") })

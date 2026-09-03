@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,7 +29,7 @@ import dev.pranav.speed400garage.ui.log.Fmt
  * and collapsing the two would be the app quietly pretending to know things.
  */
 @Composable
-fun TripReadinessScreen(
+fun ReadinessCard(
     dueViewModel: DueViewModel = hiltViewModel(),
     analyticsViewModel: AnalyticsViewModel = hiltViewModel(),
 ) {
@@ -85,18 +83,15 @@ fun TripReadinessScreen(
 
     val blockers = lines.count { it.symbol == "⚠️" }
 
-    Column(
-        Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text("Ready to ride?", style = MaterialTheme.typography.displaySmall)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("Ready to ride?", style = MaterialTheme.typography.titleLarge)
         Text(
             when {
                 blockers == 0 -> "Nothing standing in your way."
                 blockers == 1 -> "One thing to deal with first."
                 else -> "$blockers things to deal with first."
             },
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.bodyLarge,
         )
 
         Card(Modifier.fillMaxWidth()) {
