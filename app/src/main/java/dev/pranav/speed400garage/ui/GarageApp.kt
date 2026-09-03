@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -40,6 +41,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.pranav.speed400garage.ui.due.DocumentSheet
+import dev.pranav.speed400garage.ui.due.DueScreen
+import dev.pranav.speed400garage.ui.due.FaultSheet
 import dev.pranav.speed400garage.ui.log.DashboardV1
 import dev.pranav.speed400garage.ui.log.ExpenseSheet
 import dev.pranav.speed400garage.ui.log.FuelSheet
@@ -62,6 +66,8 @@ import dev.pranav.speed400garage.ui.log.ValidationDialog
 fun GarageApp() {
     var destination by remember { mutableStateOf(Destination.Dashboard) }
     var sheet by remember { mutableStateOf<Sheet?>(null) }
+
+    NotificationPermissionRequest()
 
     val updateViewModel: UpdateViewModel = hiltViewModel()
     LaunchedEffect(Unit) { updateViewModel.checkOnLaunch() }
@@ -89,7 +95,10 @@ fun GarageApp() {
                     onLogExpense = { sheet = Sheet.Expense },
                     onLogOdometer = { sheet = Sheet.Odometer },
                     onLogService = { sheet = Sheet.Service },
+                    onLogDocument = { sheet = Sheet.Document },
+                    onLogFault = { sheet = Sheet.Fault },
                 )
+                Destination.Due -> DueScreen()
                 Destination.Timeline -> TimelineScreen(snapshot)
                 Destination.Maintenance -> MaintenanceScreen()
                 Destination.QuickSpecs -> QuickSpecsScreen()
@@ -101,7 +110,29 @@ fun GarageApp() {
     sheet?.let { LogSheetHost(it) { sheet = null } }
 }
 
-enum class Sheet { Fuel, Expense, Odometer, Service }
+enum class Sheet { Fuel, Expense, Odometer, Service, Document, Fault }
+
+/**
+ * Asks for the notification permission once, on first launch.
+ *
+ * Without it the reminder engine still computes correctly and the Due screen still
+ * works — it simply cannot tell you anything you did not ask to see, which defeats
+ * most of §8.
+ */
+@Composable
+private fun NotificationPermissionRequest() {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { }
+    LaunchedEffect(Unit) {
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+            context, android.Manifest.permission.POST_NOTIFICATIONS,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (!granted) launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+}
 
 /**
  * Hosts an entry sheet and the §9.2 questions it may raise.
@@ -131,6 +162,8 @@ private fun LogSheetHost(sheet: Sheet, onClose: () -> Unit) {
                     Sheet.Expense -> "Log an expense"
                     Sheet.Odometer -> "Update the odometer"
                     Sheet.Service -> "Log a service or part"
+                    Sheet.Document -> "Add a document"
+                    Sheet.Fault -> "Log a niggle"
                 }
             )
         },
@@ -152,6 +185,12 @@ private fun LogSheetHost(sheet: Sheet, onClose: () -> Unit) {
                     Sheet.Service -> ServiceSheet(lastOdo) { odo, title, vendor, lines, components, action, notes ->
                         pendingSave = { vm.saveService(now, odo, title, vendor, lines, components, action, notes, confirmed = true) }
                         vm.saveService(now, odo, title, vendor, lines, components, action, notes)
+                    }
+                    Sheet.Document -> DocumentSheet { type, issuer, number, expires, secondary, amount, notes ->
+                        vm.saveDocument(now, type, issuer, number, expires, secondary, amount, notes)
+                    }
+                    Sheet.Fault -> FaultSheet(lastOdo) { summary, odo, notes ->
+                        vm.saveFault(now, odo, summary, notes)
                     }
                 }
             }
@@ -179,6 +218,7 @@ private fun LogSheetHost(sheet: Sheet, onClose: () -> Unit) {
 
 enum class Destination(val title: String, val icon: ImageVector) {
     Dashboard("Dashboard", Icons.Filled.Dashboard),
+    Due("Due", Icons.Filled.NotificationsActive),
     Timeline("Timeline", Icons.Filled.History),
     Maintenance("Maintenance", Icons.Filled.Build),
     QuickSpecs("Quick Specs", Icons.AutoMirrored.Filled.MenuBook),

@@ -2,11 +2,14 @@ package dev.pranav.speed400garage.data.repo
 
 import dev.pranav.speed400garage.data.db.GarageDatabase
 import dev.pranav.speed400garage.data.db.entity.ComponentActionEntity
+import dev.pranav.speed400garage.data.db.entity.DocumentEntity
 import dev.pranav.speed400garage.data.db.entity.EventEntity
+import dev.pranav.speed400garage.data.db.entity.FaultEntity
 import dev.pranav.speed400garage.data.db.entity.FuelEntryEntity
 import dev.pranav.speed400garage.data.db.entity.LineItemEntity
 import dev.pranav.speed400garage.data.db.entity.OdometerReadingEntity
 import dev.pranav.speed400garage.data.db.entity.newId
+import dev.pranav.speed400garage.domain.engine.Baseline
 import dev.pranav.speed400garage.domain.engine.Fill
 import dev.pranav.speed400garage.domain.engine.FillType
 import dev.pranav.speed400garage.domain.engine.Reading
@@ -205,6 +208,109 @@ class GarageRepository @Inject constructor(
         return eventId
     }
 
+    /**
+     * A document with its expiry, and the premium as a real expense.
+     *
+     * The premium flows into the expense total automatically (§7.6) — entering an
+     * insurance renewal in two places is exactly the double-entry §4.2 exists to
+     * prevent.
+     */
+    suspend fun logDocument(
+        bikeId: String,
+        occurredAtMillis: Long,
+        docType: String,
+        issuer: String?,
+        number: String?,
+        issuedOnMillis: Long?,
+        expiresOnMillis: Long?,
+        secondaryExpiresOnMillis: Long?,
+        amountPaise: Long?,
+        notes: String?,
+    ): String {
+        val eventId = newId()
+        val category = when (docType) {
+            "insurance" -> "insurance"
+            "puc" -> "puc"
+            "rc" -> "rto"
+            else -> "other"
+        }
+        db.eventWriteDao().writeEvent(
+            event = EventEntity(
+                id = eventId,
+                bikeId = bikeId,
+                type = "document",
+                occurredAt = occurredAtMillis,
+                odometerKm = null,
+                title = docType.replaceFirstChar { it.uppercase() } + (issuer?.let { " — $it" } ?: ""),
+                notes = notes,
+                vendorId = null,
+                location = null,
+            ),
+            lineItems = amountPaise?.takeIf { it > 0 }?.let {
+                listOf(LineItemEntity(eventId = eventId, category = category, description = number, qty = null, unitPricePaise = null, amountPaise = it))
+            } ?: emptyList(),
+        )
+        db.documentDao().insert(
+            DocumentEntity(
+                eventId = eventId,
+                docType = docType,
+                issuer = issuer,
+                number = number,
+                issuedOn = issuedOnMillis,
+                expiresOn = expiresOnMillis,
+                secondaryExpiresOn = secondaryExpiresOnMillis,
+                amountPaise = amountPaise,
+                fileUri = null,
+            )
+        )
+        return eventId
+    }
+
+    /**
+     * A niggle (§5.4). Not an expense, not a service — an open issue that stays open
+     * until something closes it. By the time the service appointment comes round you
+     * have forgotten three of the four things you meant to mention.
+     */
+    suspend fun logFault(
+        bikeId: String,
+        occurredAtMillis: Long,
+        odometerKm: Int?,
+        summary: String,
+        notes: String?,
+    ): String {
+        val eventId = newId()
+        db.eventWriteDao().writeEvent(
+            event = EventEntity(
+                id = eventId,
+                bikeId = bikeId,
+                type = "fault",
+                occurredAt = occurredAtMillis,
+                odometerKm = odometerKm,
+                title = summary,
+                notes = notes,
+                vendorId = null,
+                location = null,
+            ),
+            odometerReading = odometerKm?.let {
+                OdometerReadingEntity(bikeId = bikeId, eventId = eventId, readAt = occurredAtMillis, odometerKm = it)
+            },
+        )
+        db.faultDao().insert(
+            FaultEntity(
+                eventId = eventId,
+                summary = summary,
+                status = "open",
+                firstNoticedOdometerKm = odometerKm,
+                resolvedByEventId = null,
+            )
+        )
+        return eventId
+    }
+
+    suspend fun setFaultStatus(id: String, status: String, resolvedByEventId: String? = null) {
+        db.faultDao().setStatus(id, status, resolvedByEventId, System.currentTimeMillis())
+    }
+
     // ------------------------------------------------------------------ reads
 
     suspend fun readings(bikeId: String): List<Reading> =
@@ -229,6 +335,22 @@ class GarageRepository @Inject constructor(
 
     suspend fun lastOdometerKm(bikeId: String): Int? =
         db.odometerDao().recentReadings(bikeId, limit = 1).firstOrNull()?.odometerKm
+
+    /**
+     * Where each component's clock last restarted, and where the bike's own clock
+     * started for components never touched.
+     */
+    suspend fun baselines(bikeId: String): Map<String, Baseline> =
+        db.componentActionDao().lastActions(bikeId).mapNotNull { row ->
+            row.lastActionAt?.let { at -> row.componentKey to Baseline(epochDayOf(at), row.lastActionOdometerKm) }
+        }.toMap()
+
+    suspend fun bikeStart(bikeId: String): Baseline? {
+        val bike = db.bikeDao().activeBike() ?: return null
+        val earliest = db.odometerDao().recentReadings(bikeId, limit = 400).minByOrNull { it.readAt }
+        val day = bike.purchasedOn ?: earliest?.let { epochDayOf(it.readAt) } ?: return null
+        return Baseline(day, earliest?.odometerKm ?: 0)
+    }
 
     private companion object {
         val SERVICE_CATEGORIES = setOf("labour", "parts", "consumables")

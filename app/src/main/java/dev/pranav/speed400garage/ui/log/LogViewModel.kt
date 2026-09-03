@@ -155,6 +155,40 @@ class LogViewModel @Inject constructor(
             .onFailure { _state.value = LogState.Error(it.message ?: "Could not save.") }
     }
 
+    fun saveDocument(
+        occurredAtMillis: Long,
+        docType: String,
+        issuer: String?,
+        number: String?,
+        expiresOnMillis: Long?,
+        secondaryExpiresOnMillis: Long?,
+        amountPaise: Long?,
+        notes: String?,
+    ) = viewModelScope.launch {
+        val bikeId = repo.activeBikeId() ?: return@launch
+        runCatching {
+            repo.logDocument(
+                bikeId, occurredAtMillis, docType, issuer, number,
+                issuedOnMillis = null, expiresOnMillis = expiresOnMillis,
+                secondaryExpiresOnMillis = secondaryExpiresOnMillis,
+                amountPaise = amountPaise, notes = notes,
+            )
+        }.onSuccess { _state.value = LogState.Saved }
+            .onFailure { _state.value = LogState.Error(it.message ?: "Could not save.") }
+    }
+
+    fun saveFault(
+        occurredAtMillis: Long,
+        odometerKm: Int?,
+        summary: String,
+        notes: String?,
+    ) = viewModelScope.launch {
+        val bikeId = repo.activeBikeId() ?: return@launch
+        runCatching { repo.logFault(bikeId, occurredAtMillis, odometerKm, summary, notes) }
+            .onSuccess { _state.value = LogState.Saved; refreshContext() }
+            .onFailure { _state.value = LogState.Error(it.message ?: "Could not save.") }
+    }
+
     fun saveOdometer(occurredAtMillis: Long, odometerKm: Int, confirmed: Boolean = false) = viewModelScope.launch {
         val bikeId = repo.activeBikeId() ?: return@launch
         val validation = EntryValidator.validate(odometerKm, _lastOdometer.value)

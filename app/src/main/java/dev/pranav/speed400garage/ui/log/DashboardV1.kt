@@ -37,6 +37,8 @@ fun DashboardV1(
     onLogExpense: () -> Unit,
     onLogOdometer: () -> Unit,
     onLogService: () -> Unit,
+    onLogDocument: () -> Unit,
+    onLogFault: () -> Unit,
 ) {
     Column(
         Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
@@ -48,6 +50,8 @@ fun DashboardV1(
             Button(onClick = onLogExpense) { Text("₹  Expense") }
             Button(onClick = onLogService) { Text("🔧  Service / part") }
             OutlinedButton(onClick = onLogOdometer) { Text("🔢  Odometer") }
+            OutlinedButton(onClick = onLogDocument) { Text("📄  Document") }
+            OutlinedButton(onClick = onLogFault) { Text("⚠  Niggle") }
         }
 
         Text(snapshot.bikeName ?: "No bike yet", style = MaterialTheme.typography.displaySmall)

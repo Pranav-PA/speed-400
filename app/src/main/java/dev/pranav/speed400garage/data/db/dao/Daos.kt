@@ -14,6 +14,7 @@ import dev.pranav.speed400garage.data.db.entity.ComponentEntity
 import dev.pranav.speed400garage.data.db.entity.DocumentEntity
 import dev.pranav.speed400garage.data.db.entity.EventEntity
 import dev.pranav.speed400garage.data.db.entity.FactEntity
+import dev.pranav.speed400garage.data.db.entity.FaultEntity
 import dev.pranav.speed400garage.data.db.entity.FuelEntryEntity
 import dev.pranav.speed400garage.data.db.entity.LineItemEntity
 import dev.pranav.speed400garage.data.db.entity.OdometerReadingEntity
@@ -99,6 +100,10 @@ interface ComponentDao {
     @Query("SELECT * FROM component WHERE `key` = :key LIMIT 1")
     suspend fun byKey(key: String): ComponentEntity?
 
+    /** One-shot read for the background recompute, which has no lifecycle to observe with. */
+    @Query("SELECT * FROM component ORDER BY isDailyCheck, displayName")
+    suspend fun allOnce(): List<ComponentEntity>
+
     @Query("SELECT COUNT(*) FROM component") suspend fun count(): Int
 
     /**
@@ -159,6 +164,37 @@ interface DocumentDao {
     @Insert suspend fun insert(document: DocumentEntity)
 
     @Query("SELECT * FROM document ORDER BY expiresOn") fun observeAll(): Flow<List<DocumentEntity>>
+
+    @Query("SELECT * FROM document ORDER BY expiresOn") suspend fun all(): List<DocumentEntity>
+}
+
+@Dao
+interface FaultDao {
+    @Insert suspend fun insert(fault: FaultEntity)
+
+    /** Open niggles, newest first — this is the list read out at the service counter. */
+    @Query(
+        """
+        SELECT f.* FROM fault f
+        JOIN event e ON e.id = f.eventId
+        WHERE e.bikeId = :bikeId AND f.status IN ('open', 'watching')
+        ORDER BY e.occurredAt DESC
+        """
+    )
+    fun observeOpen(bikeId: String): Flow<List<FaultEntity>>
+
+    @Query(
+        """
+        SELECT f.* FROM fault f
+        JOIN event e ON e.id = f.eventId
+        WHERE e.bikeId = :bikeId
+        ORDER BY e.occurredAt DESC
+        """
+    )
+    fun observeAll(bikeId: String): Flow<List<FaultEntity>>
+
+    @Query("UPDATE fault SET status = :status, resolvedByEventId = :resolvedBy, updatedAt = :now WHERE id = :id")
+    suspend fun setStatus(id: String, status: String, resolvedBy: String?, now: Long)
 }
 
 @Dao
