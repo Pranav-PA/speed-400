@@ -12,8 +12,12 @@ import dev.pranav.speed400garage.data.db.dao.BikeDao
 import dev.pranav.speed400garage.data.db.dao.CaptureInboxDao
 import dev.pranav.speed400garage.data.db.dao.ComponentDao
 import dev.pranav.speed400garage.data.db.dao.EventDao
+import dev.pranav.speed400garage.data.db.dao.CostDao
 import dev.pranav.speed400garage.data.db.dao.FactDao
+import dev.pranav.speed400garage.data.db.dao.FuelDao
 import dev.pranav.speed400garage.data.db.dao.OdometerDao
+import dev.pranav.speed400garage.data.backup.BackupManager
+import dev.pranav.speed400garage.data.repo.GarageRepository
 import dev.pranav.speed400garage.data.seed.SeedLoader
 import dev.pranav.speed400garage.update.UpdateChecker
 import dev.pranav.speed400garage.update.UpdateInstaller
@@ -48,10 +52,19 @@ object AppModule {
         checker: UpdateChecker,
     ): UpdateInstaller = UpdateInstaller(context, checker)
 
+    @Provides @Singleton
+    fun provideRepository(db: GarageDatabase): GarageRepository = GarageRepository(db)
+
+    @Provides @Singleton
+    fun provideBackupManager(@ApplicationContext context: Context, db: GarageDatabase): BackupManager =
+        BackupManager(context, db)
+
     @Provides fun provideBikeDao(db: GarageDatabase): BikeDao = db.bikeDao()
     @Provides fun provideEventDao(db: GarageDatabase): EventDao = db.eventDao()
     @Provides fun provideComponentDao(db: GarageDatabase): ComponentDao = db.componentDao()
     @Provides fun provideFactDao(db: GarageDatabase): FactDao = db.factDao()
     @Provides fun provideOdometerDao(db: GarageDatabase): OdometerDao = db.odometerDao()
     @Provides fun provideCaptureInboxDao(db: GarageDatabase): CaptureInboxDao = db.captureInboxDao()
+    @Provides fun provideFuelDao(db: GarageDatabase): FuelDao = db.fuelDao()
+    @Provides fun provideCostDao(db: GarageDatabase): CostDao = db.costDao()
 }

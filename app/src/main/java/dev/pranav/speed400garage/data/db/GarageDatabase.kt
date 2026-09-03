@@ -9,7 +9,9 @@ import dev.pranav.speed400garage.data.db.dao.ComponentActionDao
 import dev.pranav.speed400garage.data.db.dao.ComponentDao
 import dev.pranav.speed400garage.data.db.dao.DocumentDao
 import dev.pranav.speed400garage.data.db.dao.EventDao
+import dev.pranav.speed400garage.data.db.dao.CostDao
 import dev.pranav.speed400garage.data.db.dao.EventWriteDao
+import dev.pranav.speed400garage.data.db.dao.FuelDao
 import dev.pranav.speed400garage.data.db.dao.FactDao
 import dev.pranav.speed400garage.data.db.dao.LineItemDao
 import dev.pranav.speed400garage.data.db.dao.OdometerDao
@@ -68,6 +70,8 @@ abstract class GarageDatabase : RoomDatabase() {
     abstract fun captureInboxDao(): CaptureInboxDao
     abstract fun factDao(): FactDao
     abstract fun settingDao(): SettingDao
+    abstract fun fuelDao(): FuelDao
+    abstract fun costDao(): CostDao
 
     companion object {
         const val NAME = "speed400_garage.db"

@@ -180,6 +180,66 @@ interface CaptureInboxDao {
     fun observePendingCount(): Flow<Int>
 }
 
+/** A fuel fill flattened across its event and facet — what the economy engine needs. */
+data class FillRow(
+    val eventId: String,
+    val occurredAt: Long,
+    val odometerKm: Int?,
+    val litres: Double,
+    val pricePerLitrePaise: Long?,
+    val amountPaise: Long,
+    val fillType: String,
+    val missedPrevious: Boolean,
+)
+
+@Dao
+interface FuelDao {
+    @Query(
+        """
+        SELECT e.id AS eventId, e.occurredAt AS occurredAt, e.odometerKm AS odometerKm,
+               f.litres AS litres, f.pricePerLitrePaise AS pricePerLitrePaise,
+               f.amountPaise AS amountPaise, f.fillType AS fillType,
+               f.missedPrevious AS missedPrevious
+        FROM fuel_entry f
+        JOIN event e ON e.id = f.eventId
+        WHERE e.bikeId = :bikeId
+        ORDER BY e.occurredAt ASC, e.createdAt ASC
+        """
+    )
+    suspend fun fillsFor(bikeId: String): List<FillRow>
+
+    @Query(
+        """
+        SELECT e.id AS eventId, e.occurredAt AS occurredAt, e.odometerKm AS odometerKm,
+               f.litres AS litres, f.pricePerLitrePaise AS pricePerLitrePaise,
+               f.amountPaise AS amountPaise, f.fillType AS fillType,
+               f.missedPrevious AS missedPrevious
+        FROM fuel_entry f
+        JOIN event e ON e.id = f.eventId
+        WHERE e.bikeId = :bikeId
+        ORDER BY e.occurredAt ASC, e.createdAt ASC
+        """
+    )
+    fun observeFills(bikeId: String): Flow<List<FillRow>>
+}
+
+/** Every line item under a bike, flattened for the cost engine (§4.2). */
+data class CostRow(val category: String, val amountPaise: Long, val occurredAt: Long)
+
+@Dao
+interface CostDao {
+    @Query(
+        """
+        SELECT li.category AS category, li.amountPaise AS amountPaise, e.occurredAt AS occurredAt
+        FROM line_item li
+        JOIN event e ON e.id = li.eventId
+        WHERE e.bikeId = :bikeId
+        ORDER BY e.occurredAt ASC
+        """
+    )
+    fun observeAll(bikeId: String): Flow<List<CostRow>>
+}
+
 @Dao
 interface SettingDao {
     @Upsert suspend fun put(setting: SettingEntity)
