@@ -12,13 +12,18 @@ configure on the tablet.
 
 ### 1. Create the signing key
 
-**Windows** (PowerShell, in the repo folder):
+**Windows** (PowerShell — a normal one, *not* Administrator):
 
 ```powershell
+cd $env:USERPROFILE
 git clone https://github.com/Pranav-PA/speed-400
 cd speed-400
 powershell -ExecutionPolicy Bypass -File scripts\setup-signing.ps1
 ```
+
+> An Administrator PowerShell starts in `C:\Windows\system32`, so cloning from one
+> drops the repo into a protected system folder. Nothing here needs Administrator.
+> The script refuses to run from there and tells you how to move it.
 
 **macOS / Linux**, or Windows Git Bash (right-click in the folder → *Git Bash Here*):
 
@@ -54,12 +59,18 @@ Then delete `keystore-base64.txt` — it is as sensitive as the keystore.
 > worst thing that can happen here, and it is entirely preventable. The keystore is
 > gitignored; it must stay that way.
 
-Both scripts need `keytool`, which ships with any JDK, and both will look for Android
-Studio's bundled one before giving up. If neither finds it:
+Both scripts need `keytool`, which ships with any JDK. They search `PATH`, `JAVA_HOME`,
+Android Studio's bundled runtime and the usual JDK install roots before giving up. If
+none of those has one:
 
-- Windows: `winget install EclipseAdoptium.Temurin.17.JDK`
+- Windows: `winget install EclipseAdoptium.Temurin.17.JDK`, then **close and reopen
+  PowerShell** so `PATH` picks it up. No winget? Grab the x64 `.msi` from
+  <https://adoptium.net/>.
 - macOS: `brew install openjdk@17`
 - Linux: `sudo apt install default-jdk`
+
+A JDK is needed *only* to create the signing key. CI does every actual build, so you
+never need one again unless you want to build locally.
 
 ### 2. Cut the first release
 

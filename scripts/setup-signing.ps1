@@ -13,6 +13,24 @@ $ErrorActionPreference = 'Stop'
 $Out   = if ($args.Count -ge 1) { $args[0] } else { 'release.jks' }
 $Alias = 'speed400garage'
 
+# A clone under system32 (or anywhere under the Windows directory) is almost always an
+# accident: an elevated PowerShell starts there, so `git clone` lands the repo in a
+# protected system folder. Gradle and the signing key do not belong there.
+$here = (Get-Location).Path
+if ($here -like "$env:WinDir*") {
+    Write-Host "STOP: this repository is inside a Windows system directory." -ForegroundColor Red
+    Write-Host "  $here"
+    Write-Host ""
+    Write-Host "That happens when PowerShell is opened as Administrator, which starts in"
+    Write-Host "system32. Move it somewhere it belongs, then run this again:"
+    Write-Host ""
+    Write-Host "    Move-Item '$here' `"`$env:USERPROFILE\speed-400`"" -ForegroundColor Cyan
+    Write-Host "    cd `"`$env:USERPROFILE\speed-400`"" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "You do not need Administrator for any part of this project."
+    exit 1
+}
+
 if (Test-Path $Out) {
     Write-Host "ERROR: $Out already exists. Refusing to overwrite an existing signing key." -ForegroundColor Red
     Write-Host "If you genuinely want a new one, move the old file aside first - and read"
@@ -20,26 +38,46 @@ if (Test-Path $Out) {
     exit 1
 }
 
-# keytool ships with any JDK. Android Studio bundles one, so look there before giving up.
+# keytool ships with any JDK. Look in every place one plausibly lives before giving up.
 $keytool = (Get-Command keytool -ErrorAction SilentlyContinue).Source
+if (-not $keytool -and $env:JAVA_HOME) {
+    $j = Join-Path $env:JAVA_HOME 'bin\keytool.exe'
+    if (Test-Path $j) { $keytool = $j }
+}
 if (-not $keytool) {
-    $candidates = @(
-        "$env:ProgramFiles\Android\Android Studio\jbr\bin\keytool.exe",
-        "$env:LOCALAPPDATA\Programs\Android Studio\jbr\bin\keytool.exe",
-        "$env:ProgramFiles\Java\*\bin\keytool.exe",
-        "$env:ProgramFiles\Eclipse Adoptium\*\bin\keytool.exe"
+    $roots = @(
+        "$env:ProgramFiles\Android\Android Studio*\jbr\bin\keytool.exe",
+        "$env:ProgramFiles\Android\Android Studio*\jre\bin\keytool.exe",
+        "$env:LOCALAPPDATA\Programs\Android Studio*\jbr\bin\keytool.exe",
+        "$env:ProgramFiles\Eclipse Adoptium\jdk*\bin\keytool.exe",
+        "$env:ProgramFiles\Java\jdk*\bin\keytool.exe",
+        "$env:ProgramFiles\Microsoft\jdk*\bin\keytool.exe",
+        "$env:ProgramFiles\Amazon Corretto\jdk*\bin\keytool.exe",
+        "$env:ProgramFiles\BellSoft\*\bin\keytool.exe",
+        "$env:ProgramFiles\Zulu\*\bin\keytool.exe",
+        "${env:ProgramFiles(x86)}\Java\jdk*\bin\keytool.exe",
+        "$env:LOCALAPPDATA\Programs\Eclipse Adoptium\jdk*\bin\keytool.exe"
     )
-    foreach ($c in $candidates) {
-        $found = Get-Item $c -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($found) { $keytool = $found.FullName; break }
-    }
+    # Newest version last in a sort, so take the last match.
+    $hit = $roots |
+        ForEach-Object { Get-Item $_ -ErrorAction SilentlyContinue } |
+        Sort-Object FullName |
+        Select-Object -Last 1
+    if ($hit) { $keytool = $hit.FullName }
 }
 if (-not $keytool) {
     Write-Host "ERROR: keytool not found." -ForegroundColor Red
-    Write-Host "It ships with any JDK. Either install one:"
-    Write-Host "    winget install EclipseAdoptium.Temurin.17.JDK"
-    Write-Host "or, if you have Android Studio, it is usually at:"
-    Write-Host "    $env:ProgramFiles\Android\Android Studio\jbr\bin\keytool.exe"
+    Write-Host ""
+    Write-Host "It ships with any JDK, and this script only needs it once - to create the"
+    Write-Host "signing key. Install one, then CLOSE AND REOPEN PowerShell so PATH updates:"
+    Write-Host ""
+    Write-Host "    winget install EclipseAdoptium.Temurin.17.JDK" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "No winget? Download the Windows x64 .msi from https://adoptium.net/"
+    Write-Host ""
+    Write-Host "Already have a JDK or Android Studio somewhere unusual? Point at it directly:"
+    Write-Host "    `$env:JAVA_HOME = 'C:\path\to\jdk'" -ForegroundColor Cyan
+    Write-Host "    powershell -ExecutionPolicy Bypass -File scripts\setup-signing.ps1"
     exit 1
 }
 Write-Host "Using keytool at $keytool"
