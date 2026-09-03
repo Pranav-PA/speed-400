@@ -46,6 +46,17 @@ interface EventDao {
     fun observeRecent(bikeId: String, limit: Int): Flow<List<EventEntity>>
 
     @Query("SELECT COUNT(*) FROM event WHERE bikeId = :bikeId") fun observeCount(bikeId: String): Flow<Int>
+
+    @Query("SELECT * FROM event WHERE bikeId = :bikeId AND type = :type ORDER BY occurredAt DESC LIMIT 1")
+    suspend fun lastOfType(bikeId: String, type: String): EventEntity?
+
+    @Query(
+        """
+        SELECT * FROM event WHERE bikeId = :bikeId AND type IN (:types)
+        ORDER BY occurredAt DESC LIMIT :limit
+        """
+    )
+    suspend fun recentOfTypes(bikeId: String, types: List<String>, limit: Int): List<EventEntity>
 }
 
 @Dao
@@ -73,6 +84,27 @@ interface LineItemDao {
         """
     )
     suspend fun totalPaiseByCategory(bikeId: String, category: String): Long
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(li.amountPaise), 0) FROM line_item li
+        JOIN event e ON e.id = li.eventId
+        WHERE e.bikeId = :bikeId AND li.category = :category
+          AND e.occurredAt BETWEEN :fromMillis AND :toMillis
+        """
+    )
+    suspend fun totalPaiseByCategoryBetween(bikeId: String, category: String, fromMillis: Long, toMillis: Long): Long
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM line_item li
+        JOIN event e ON e.id = li.eventId
+        WHERE e.bikeId = :bikeId
+          AND e.occurredAt BETWEEN :fromMillis AND :toMillis
+          AND (:category IS NULL OR li.category = :category)
+        """
+    )
+    suspend fun countBetween(bikeId: String, fromMillis: Long, toMillis: Long, category: String?): Int
 }
 
 @Dao
@@ -151,6 +183,9 @@ interface FactDao {
     @Query("SELECT * FROM fact WHERE `key` = :key LIMIT 1") suspend fun byKey(key: String): FactEntity?
 
     @Query("SELECT COUNT(*) FROM fact") suspend fun count(): Int
+
+    /** One-shot read for the assistant, which has no lifecycle to observe with. */
+    @Query("SELECT * FROM fact ORDER BY category, label") suspend fun allOnce(): List<FactEntity>
 
     @Query("SELECT COUNT(*) FROM fact WHERE verifiedOn IS NOT NULL") fun observeVerifiedCount(): Flow<Int>
 

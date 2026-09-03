@@ -43,6 +43,29 @@ class UpdateSettings @Inject constructor(context: Context) {
     fun hasToken(): Boolean = token() != null
 
     /**
+     * The Gemini API key (§10.6). Encrypted, entered once, never committed and never
+     * compiled in.
+     */
+    fun geminiKey(): String? = prefs.getString(KEY_GEMINI, null)?.takeIf { it.isNotBlank() }
+
+    fun setGeminiKey(key: String?) {
+        prefs.edit().apply {
+            if (key.isNullOrBlank()) remove(KEY_GEMINI) else putString(KEY_GEMINI, key.trim())
+        }.apply()
+    }
+
+    /**
+     * The model ID, kept in settings rather than code.
+     *
+     * Google retires models on a schedule, so a hardcoded ID is a bug with a delayed
+     * fuse. There is no default: the app asks the API which models the key can use and
+     * the owner picks one, which cannot go stale.
+     */
+    var geminiModel: String?
+        get() = prefs.getString(KEY_GEMINI_MODEL, null)
+        set(value) = prefs.edit().putString(KEY_GEMINI_MODEL, value).apply()
+
+    /**
      * Whether to check on launch. On by default — an update mechanism nobody
      * remembers to trigger is one that never gets used.
      */
@@ -60,5 +83,7 @@ class UpdateSettings @Inject constructor(context: Context) {
         const val KEY_TOKEN = "github.token"
         const val KEY_AUTO_CHECK = "updates.auto_check"
         const val KEY_LAST_CHECKED = "updates.last_checked"
+        const val KEY_GEMINI = "gemini.api_key"
+        const val KEY_GEMINI_MODEL = "gemini.model"
     }
 }

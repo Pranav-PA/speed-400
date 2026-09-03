@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Dashboard
@@ -51,6 +52,7 @@ import dev.pranav.speed400garage.ui.due.DueScreen
 import dev.pranav.speed400garage.ui.due.FaultSheet
 import dev.pranav.speed400garage.ui.due.BuildSheetScreen
 import dev.pranav.speed400garage.ui.due.TripReadinessScreen
+import dev.pranav.speed400garage.ui.assistant.AssistantScreen
 import dev.pranav.speed400garage.ui.search.SearchScreen
 import dev.pranav.speed400garage.ui.log.DashboardV1
 import dev.pranav.speed400garage.ui.log.ExpenseSheet
@@ -107,6 +109,7 @@ fun GarageApp() {
                     onLogFault = { sheet = Sheet.Fault },
                 )
                 Destination.Ready -> TripReadinessScreen()
+                Destination.Assistant -> AssistantScreen()
                 Destination.Due -> DueScreen()
                 Destination.Analytics -> AnalyticsScreen()
                 Destination.Timeline -> TimelineScreen(snapshot)
@@ -231,6 +234,7 @@ private fun LogSheetHost(sheet: Sheet, onClose: () -> Unit) {
 enum class Destination(val title: String, val icon: ImageVector) {
     Dashboard("Dashboard", Icons.Filled.Dashboard),
     Ready("Ready?", Icons.Filled.Flag),
+    Assistant("Ask", Icons.AutoMirrored.Filled.Chat),
     Due("Due", Icons.Filled.NotificationsActive),
     Analytics("Analytics", Icons.Filled.InsertChart),
     Timeline("Timeline", Icons.Filled.History),
