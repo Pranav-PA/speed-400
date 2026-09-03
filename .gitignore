@@ -22,3 +22,6 @@ release.jks
 keystore.properties
 dist/
 .kotlin/
+
+# Signing by-products — as sensitive as the keystore itself.
+keystore-base64.txt

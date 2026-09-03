@@ -12,21 +12,39 @@ configure on the tablet.
 
 ### 1. Create the signing key
 
+**Windows** (PowerShell, in the repo folder):
+
+```powershell
+git clone https://github.com/Pranav-PA/speed-400
+cd speed-400
+powershell -ExecutionPolicy Bypass -File scripts\setup-signing.ps1
+```
+
+**macOS / Linux**, or Windows Git Bash (right-click in the folder → *Git Bash Here*):
+
 ```bash
 git clone https://github.com/Pranav-PA/speed-400
 cd speed-400
-./scripts/setup-signing.sh
+bash scripts/setup-signing.sh
 ```
 
-It writes `release.jks` and prints four values. Add them at
+> Double-clicking `setup-signing.sh` on Windows opens it in Notepad rather than running
+> it — `.sh` files are not executable there. Use the PowerShell script, or Git Bash.
+
+It asks for a password, then writes two files: `release.jks` (the key itself) and
+`keystore-base64.txt` (the same thing encoded for GitHub). Both are gitignored.
+
+Add four secrets at
 **Settings → Secrets and variables → Actions → New repository secret**:
 
 | Secret | Value |
 |---|---|
-| `KEYSTORE_BASE64` | the long single line the script prints |
+| `KEYSTORE_BASE64` | open `keystore-base64.txt`, select all, paste — about 5,900 characters, one line, no spaces |
 | `KEYSTORE_PASSWORD` | the password you chose |
 | `KEY_PASSWORD` | the same password |
 | `KEY_ALIAS` | `speed400garage` |
+
+Then delete `keystore-base64.txt` — it is as sensitive as the keystore.
 
 > **Back `release.jks` up somewhere you will still have in five years.**
 >
@@ -36,8 +54,12 @@ It writes `release.jks` and prints four values. Add them at
 > worst thing that can happen here, and it is entirely preventable. The keystore is
 > gitignored; it must stay that way.
 
-Requires `keytool`, which ships with any JDK. `sudo apt install default-jdk` if you
-don't have one.
+Both scripts need `keytool`, which ships with any JDK, and both will look for Android
+Studio's bundled one before giving up. If neither finds it:
+
+- Windows: `winget install EclipseAdoptium.Temurin.17.JDK`
+- macOS: `brew install openjdk@17`
+- Linux: `sudo apt install default-jdk`
 
 ### 2. Cut the first release
 
