@@ -46,6 +46,13 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # The runner image's preinstalled SDK set drifts. Pin what the build needs so an
+      # image change cannot silently break a release.
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0'
+
+
       - name: Restore the signing keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -76,7 +83,11 @@ jobs:
           set -euo pipefail
           APK=app/build/outputs/apk/release/app-release.apk
           test -f "$APK" || { echo "::error::No signed APK produced — check the keystore secrets."; exit 1; }
-          "$ANDROID_HOME"/build-tools/35.0.0/apksigner verify --print-certs "$APK"
+          # Don't pin a build-tools version: the runner image's set changes over time,
+          # and a hardcoded path turns an image bump into a failed release.
+          APKSIGNER=$(ls -1 "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          test -n "$APKSIGNER" || { echo "::error::No apksigner found under $ANDROID_HOME/build-tools."; exit 1; }
+          "$APKSIGNER" verify --print-certs "$APK"
 
       - name: Assemble the release assets
         id: assets

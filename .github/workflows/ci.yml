@@ -16,6 +16,13 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
 
+      # The runner image's preinstalled SDK set drifts. Pin what the build needs so an
+      # image change cannot silently break a release.
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0'
+
+
       # The seed-integrity tests are the ones that matter here: they fail the build if
       # an interval or a safety-critical spec ever loses its handbook citation.
       - run: ./gradlew :app:testDebugUnitTest :app:assembleDebug --console=plain
