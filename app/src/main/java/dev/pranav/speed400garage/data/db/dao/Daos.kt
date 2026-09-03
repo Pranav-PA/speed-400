@@ -15,6 +15,7 @@ import dev.pranav.speed400garage.data.db.entity.DocumentEntity
 import dev.pranav.speed400garage.data.db.entity.EventEntity
 import dev.pranav.speed400garage.data.db.entity.FactEntity
 import dev.pranav.speed400garage.data.db.entity.FaultEntity
+import dev.pranav.speed400garage.data.db.entity.HandbookChunkEntity
 import dev.pranav.speed400garage.data.db.entity.FuelEntryEntity
 import dev.pranav.speed400garage.data.db.entity.LineItemEntity
 import dev.pranav.speed400garage.data.db.entity.OdometerReadingEntity
@@ -343,6 +344,39 @@ interface SearchDao {
         """
     )
     suspend fun searchLike(bikeId: String, text: String): List<EventEntity>
+}
+
+@Dao
+interface HandbookDao {
+    @Insert suspend fun insertAll(chunks: List<HandbookChunkEntity>)
+
+    @Query("DELETE FROM handbook_chunk") suspend fun clear()
+
+    @Query("SELECT COUNT(*) FROM handbook_chunk") suspend fun count(): Int
+
+    @Query("SELECT COUNT(*) FROM handbook_chunk") fun observeCount(): Flow<Int>
+
+    @Query("SELECT MAX(page) FROM handbook_chunk") suspend fun lastPage(): Int?
+
+    /**
+     * Retrieval over the handbook, page-cited.
+     *
+     * Ordered by page so a multi-hit answer reads in the order the manual does, which
+     * matters for procedures — steps out of order are worse than no steps.
+     */
+    @Query(
+        """
+        SELECT c.* FROM handbook_chunk c
+        JOIN handbook_chunk_fts ON handbook_chunk_fts.rowid = c.rowid
+        WHERE handbook_chunk_fts MATCH :query
+        ORDER BY c.page, c.ordinal
+        LIMIT :limit
+        """
+    )
+    suspend fun search(query: String, limit: Int = 6): List<HandbookChunkEntity>
+
+    @Query("SELECT * FROM handbook_chunk WHERE page = :page ORDER BY ordinal")
+    suspend fun page(page: Int): List<HandbookChunkEntity>
 }
 
 @Dao

@@ -16,9 +16,11 @@ import dev.pranav.speed400garage.data.db.dao.CostDao
 import dev.pranav.speed400garage.data.db.dao.DocumentDao
 import dev.pranav.speed400garage.data.db.dao.FactDao
 import dev.pranav.speed400garage.data.db.dao.FaultDao
+import dev.pranav.speed400garage.data.db.dao.HandbookDao
 import dev.pranav.speed400garage.data.db.dao.SearchDao
 import dev.pranav.speed400garage.data.db.dao.FuelDao
 import dev.pranav.speed400garage.data.db.dao.OdometerDao
+import dev.pranav.speed400garage.ai.HandbookImporter
 import dev.pranav.speed400garage.data.backup.BackupManager
 import dev.pranav.speed400garage.data.repo.GarageRepository
 import dev.pranav.speed400garage.data.seed.SeedLoader
@@ -37,7 +39,7 @@ object AppModule {
         Room.databaseBuilder(context, GarageDatabase::class.java, GarageDatabase.NAME)
             // No fallbackToDestructiveMigration: this is a ten-year record (§3 P6).
             // A missing migration must fail loudly in development, never wipe the device.
-            .addMigrations(GarageDatabase.MIGRATION_1_2)
+            .addMigrations(GarageDatabase.MIGRATION_1_2, GarageDatabase.MIGRATION_2_3)
             .build()
 
     @Provides @Singleton
@@ -63,6 +65,10 @@ object AppModule {
     fun provideBackupManager(@ApplicationContext context: Context, db: GarageDatabase): BackupManager =
         BackupManager(context, db)
 
+    @Provides @Singleton
+    fun provideHandbookImporter(@ApplicationContext context: Context, dao: HandbookDao): HandbookImporter =
+        HandbookImporter(context, dao)
+
     @Provides fun provideBikeDao(db: GarageDatabase): BikeDao = db.bikeDao()
     @Provides fun provideEventDao(db: GarageDatabase): EventDao = db.eventDao()
     @Provides fun provideComponentDao(db: GarageDatabase): ComponentDao = db.componentDao()
@@ -74,5 +80,6 @@ object AppModule {
     @Provides fun provideDocumentDao(db: GarageDatabase): DocumentDao = db.documentDao()
     @Provides fun provideFaultDao(db: GarageDatabase): FaultDao = db.faultDao()
     @Provides fun provideSearchDao(db: GarageDatabase): SearchDao = db.searchDao()
+    @Provides fun provideHandbookDao(db: GarageDatabase): HandbookDao = db.handbookDao()
     @Provides fun provideComponentActionDao(db: GarageDatabase): dev.pranav.speed400garage.data.db.dao.ComponentActionDao = db.componentActionDao()
 }

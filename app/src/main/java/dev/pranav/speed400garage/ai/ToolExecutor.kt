@@ -281,10 +281,15 @@ class ToolExecutor @Inject constructor(
     // ------------------------------------------------------------------ knowledge tool
 
     /**
-     * The curated fact table (§10.3), which is the authority for §10.5's safety rule.
+     * Handbook knowledge, in two layers.
      *
-     * Offline, instant, and every row carries the handbook page it came from. A miss
-     * is an honest refusal rather than a guess.
+     * The curated fact table (§10.3) is tried first: it is the authority for §10.5's
+     * safety rule, it is exact, and every row carries its page. Only if nothing matches
+     * does this fall through to the imported handbook corpus, which answers the
+     * procedure questions a fact table cannot ("how do I adjust the chain").
+     *
+     * That order matters. A retrieved passage mentioning a pressure is weaker evidence
+     * than a curated row stating one, so the stronger source must win when both exist.
      */
     private suspend fun specLookup(call: ToolCall): ToolAnswer {
         val query = call.args["query"].orEmpty().lowercase().trim()
@@ -298,14 +303,7 @@ class ToolExecutor @Inject constructor(
                 query.split(Regex("\\s+")).count { fact.label.lowercase().contains(it) }
             }
 
-        if (hit == null) {
-            return ToolAnswer(
-                SafetyTopics.REFUSAL,
-                Provenance.GENERAL,
-                sources = emptyList(),
-                isSafetyCritical = true,
-            )
-        }
+        if (hit == null) return fromHandbook(query)
         val value = if (hit.unit.isNullOrBlank()) hit.value else "${hit.value} ${hit.unit}"
         return ToolAnswer(
             text = "${hit.label}: $value" + (hit.notes?.let { "\n$it" } ?: ""),
@@ -313,6 +311,54 @@ class ToolExecutor @Inject constructor(
             pageRef = hit.pageRef,
             sources = listOf(value, hit.notes.orEmpty(), hit.pageRef?.toString().orEmpty()),
             isSafetyCritical = hit.isSafetyCritical,
+        )
+    }
+
+    /**
+     * Retrieval over the imported handbook.
+     *
+     * Every passage is returned with its page, and the answer says which pages it came
+     * from — so a 🟢 badge is always checkable against the printed manual rather than
+     * being a claim the app makes about itself.
+     */
+    private suspend fun fromHandbook(query: String): ToolAnswer {
+        if (db.handbookDao().count() == 0) {
+            return ToolAnswer(
+                SafetyTopics.REFUSAL + " (The handbook PDF isn't imported yet — Settings can do that.)",
+                Provenance.GENERAL, sources = emptyList(), isSafetyCritical = true,
+            )
+        }
+
+        val terms = query.split(Regex("[^a-z0-9]+")).filter { it.length > 2 }
+        if (terms.isEmpty()) {
+            return ToolAnswer(SafetyTopics.REFUSAL, Provenance.GENERAL, sources = emptyList(), isSafetyCritical = true)
+        }
+
+        // OR rather than AND: a handbook phrases things its own way, and requiring
+        // every word of the question to appear finds nothing far too often.
+        val hits = runCatching { db.handbookDao().search(terms.joinToString(" OR ") { "$it*" }) }
+            .getOrDefault(emptyList())
+
+        if (hits.isEmpty()) {
+            return ToolAnswer(SafetyTopics.REFUSAL, Provenance.GENERAL, sources = emptyList(), isSafetyCritical = true)
+        }
+
+        // Rank by how many of the question's words actually appear, so a passage that
+        // merely mentions one term loses to one that is genuinely about the subject.
+        val ranked = hits.sortedByDescending { chunk ->
+            terms.count { chunk.text.lowercase().contains(it) }
+        }.take(2)
+
+        val pages = ranked.map { it.page }.distinct()
+        return ToolAnswer(
+            text = ranked.joinToString("\n\n") { it.text.take(700) } +
+                "\n\n— handbook " + (if (pages.size == 1) "p.${pages.first()}" else "pp. ${pages.joinToString(", ")}"),
+            provenance = Provenance.MANUAL,
+            pageRef = pages.first(),
+            sources = ranked.map { it.text } + pages.map { it.toString() },
+            // A retrieved passage is not the curated table, so anything safety-critical
+            // still has to survive the grounding check on its own text.
+            isSafetyCritical = SafetyTopics.isSafetyCritical(query),
         )
     }
 

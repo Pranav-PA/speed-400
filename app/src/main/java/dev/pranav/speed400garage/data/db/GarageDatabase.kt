@@ -14,6 +14,7 @@ import dev.pranav.speed400garage.data.db.dao.EventWriteDao
 import dev.pranav.speed400garage.data.db.dao.FuelDao
 import dev.pranav.speed400garage.data.db.dao.FactDao
 import dev.pranav.speed400garage.data.db.dao.FaultDao
+import dev.pranav.speed400garage.data.db.dao.HandbookDao
 import dev.pranav.speed400garage.data.db.dao.SearchDao
 import dev.pranav.speed400garage.data.db.dao.LineItemDao
 import dev.pranav.speed400garage.data.db.dao.OdometerDao
@@ -27,6 +28,8 @@ import dev.pranav.speed400garage.data.db.entity.DocumentEntity
 import dev.pranav.speed400garage.data.db.entity.EventEntity
 import dev.pranav.speed400garage.data.db.entity.EventFts
 import dev.pranav.speed400garage.data.db.entity.FactEntity
+import dev.pranav.speed400garage.data.db.entity.HandbookChunkEntity
+import dev.pranav.speed400garage.data.db.entity.HandbookChunkFts
 import dev.pranav.speed400garage.data.db.entity.FaultEntity
 import dev.pranav.speed400garage.data.db.entity.FuelEntryEntity
 import dev.pranav.speed400garage.data.db.entity.InventoryItemEntity
@@ -57,8 +60,10 @@ import dev.pranav.speed400garage.data.db.entity.VendorEntity
         InventoryItemEntity::class,
         FactEntity::class,
         SettingEntity::class,
+        HandbookChunkEntity::class,
+        HandbookChunkFts::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class GarageDatabase : RoomDatabase() {
@@ -78,6 +83,7 @@ abstract class GarageDatabase : RoomDatabase() {
     abstract fun costDao(): CostDao
     abstract fun faultDao(): FaultDao
     abstract fun searchDao(): SearchDao
+    abstract fun handbookDao(): HandbookDao
 
     companion object {
         const val NAME = "speed400_garage.db"
@@ -87,6 +93,23 @@ abstract class GarageDatabase : RoomDatabase() {
          * destructive fallback: this database is a ten-year record (§3 P6), and losing
          * it to a schema bump would be the single worst bug this app could have.
          */
+        /** Adds the handbook corpus and its full-text index. */
+        val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `handbook_chunk` (" +
+                        "`id` TEXT NOT NULL, `page` INTEGER NOT NULL, `ordinal` INTEGER NOT NULL, " +
+                        "`text` TEXT NOT NULL, `section` TEXT, `createdAt` INTEGER NOT NULL, " +
+                        "`updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_handbook_chunk_page` ON `handbook_chunk` (`page`)")
+                db.execSQL(
+                    "CREATE VIRTUAL TABLE IF NOT EXISTS `handbook_chunk_fts` USING FTS4(" +
+                        "`text` TEXT, `section` TEXT, content=`handbook_chunk`)"
+                )
+            }
+        }
+
         val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL(

@@ -20,6 +20,7 @@ fun SettingsScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Settings", style = MaterialTheme.typography.displaySmall)
+        dev.pranav.speed400garage.ui.assistant.HandbookCard()
         dev.pranav.speed400garage.ui.log.BackupCard()
         UpdateSettingsCard()
 
